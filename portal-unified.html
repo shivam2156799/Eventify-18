@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Unified Portal | Eventify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #a855f7;
+      --primary-dark: #9333ea;
+      --secondary: #f59e0b;
+      --bg-darker: #020617;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+    body { background: var(--bg-darker); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+
+    /* NAVBAR */
+    .navbar { display:flex; justify-content:space-between; align-items:center; padding:20px 50px; background:rgba(15,23,42,0.9); backdrop-filter: blur(10px); border-bottom:1px solid #334155; position:sticky; top:0; z-index:999; }
+    .navbar h1 { color: var(--primary); font-size: 24px; font-weight: 900; }
+    .nav-links { display: flex; list-style: none; gap: 25px; }
+    .nav-links a { color: var(--text-dim); text-decoration: none; font-weight: 700; font-size: 14px; transition: 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+    .btn-logout { color: var(--danger) !important; border: 1px solid var(--danger); padding: 6px 14px; border-radius: 8px; }
+    .btn-logout:hover { background: var(--danger); color: white !important; }
+
+    /* LOGIN VIEW */
+    #login-view { min-height: 80vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+    .auth-card { position: relative; background: var(--bg-dark); border: 1px solid #334155; border-radius: 24px; width: 100%; max-width: 420px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .auth-tabs { display: flex; background: var(--bg-card); border-bottom: 2px solid var(--primary); }
+    .auth-tab { flex: 1; padding: 20px; text-align: center; cursor: pointer; font-weight: 800; color: var(--text-dim); transition: 0.3s; }
+    .auth-tab.active { color: var(--secondary); background: var(--bg-dark); }
+    .auth-content { padding: 35px; }
+    
+    .input-grp { margin-bottom: 20px; }
+    .input-grp label { display: block; font-size: 11px; color: var(--primary); font-weight: 900; margin-bottom: 8px; text-transform: uppercase; }
+    .input-grp input, .input-grp select, .input-grp textarea { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 12px; color: white; outline: none; transition: 0.3s; }
+    .input-grp input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2); }
+    
+    .submit-btn { width: 100%; padding: 16px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.3s; }
+    .submit-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .new-club-link { background: #0b1220; border: 1px solid #334155; color: #93c5fd; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .new-club-link:hover { border-color: #60a5fa; color: #dbeafe; }
+    .portal-new-club-fab { position: fixed; right: 18px; bottom: 18px; z-index: 21000; }
+
+    /* DASHBOARD VIEW */
+    #dashboard-view { display: none; padding: 40px 50px; max-width: 1400px; margin: 0 auto; grid-template-columns: 320px 1fr; gap: 40px; }
+    .sidebar { background: var(--bg-card); border-radius: 24px; padding: 35px 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); height: fit-content; }
+    .club-header { text-align: center; margin-bottom: 35px; border-bottom: 1px solid #334155; padding-bottom: 20px; }
+    .club-header h2 { font-size: 1.4rem; color: var(--text-main); margin-bottom: 5px; }
+    .club-header p { font-size: 0.75rem; color: var(--text-dim); font-weight: 700; }
+
+    .menu-list { list-style: none; }
+    .menu-item { padding: 16px; margin-bottom: 10px; border-radius: 14px; cursor: pointer; color: var(--text-dim); font-weight: 700; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+    .menu-item.active { background: var(--primary); color: white; }
+    .menu-item:hover:not(.active) { background: rgba(168, 85, 247, 0.1); color: var(--primary); }
+    .badge { background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 900; }
+
+    .content-card { background: var(--bg-card); border-radius: 24px; padding: 45px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .content-card h2 { font-size: 2rem; margin-bottom: 35px; }
+
+    .event-card { background: var(--bg-dark); border-radius: 20px; padding: 30px; margin-bottom: 20px; border-left: 6px solid var(--primary); display: flex; justify-content: space-between; align-items: flex-start; position: relative; transition: 0.3s; }
+    .event-card:hover { transform: scale(1.01); }
+    .status-tag { position: absolute; top: 25px; right: 25px; background: var(--secondary); color: black; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; }
+    
+    .event-info h3 { font-size: 1.5rem; margin-bottom: 10px; }
+    .event-info p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; }
+
+    .action-group { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-sm { padding: 8px 16px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
+    .btn-blue { background: #3b82f6; color: white; }
+    .btn-red { background: var(--danger); color: white; }
+
+    .team-entry-card { background: var(--bg-dark); border-radius: 16px; padding: 20px; margin-bottom: 14px; border: 1px solid #334155; }
+    .team-entry-card h4 { margin-bottom: 8px; font-size: 1.05rem; }
+    .team-entry-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
+    .team-entry-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 8px; }
+    .team-group { margin-bottom: 24px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+    .team-group-title { margin-bottom: 12px; color: var(--text-main); font-size: 1rem; }
+    .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; color: var(--text-main); }
+    .join-app-card { background: var(--bg-dark); border: 1px solid #334155; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .join-app-card p { color: var(--text-dim); margin: 4px 0; font-size: 0.9rem; }
+
+    /* MODAL */
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(5px); }
+    .modal-box { background: var(--bg-card); width: 95%; max-width: 500px; padding: 40px; border-radius: 30px; border: 1px solid #334155; }
+
+    .success-alert { background: var(--success); color: white; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; margin-bottom: 25px; display: none; animation: slideDown 0.4s ease; }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    @media (max-width: 900px) {
+      #dashboard-view { grid-template-columns: 1fr; padding: 20px; }
+      .navbar { padding: 15px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <h1>Eventify</h1>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="clubs-v5.html">Clubs</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li id="nav-logout-li" style="display:none;"><a href="#" onclick="logout()" class="btn-logout">LOGOUT</a></li>
+    </ul>
+  </header>
+
+  <!-- LOGIN VIEW -->
+  <main id="login-view">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-log" onclick="toggleAuth('log')">SIGN IN</div>
+        <div class="auth-tab" id="tab-reg" onclick="toggleAuth('reg')">REGISTER</div>
+      </div>
+      <div class="auth-content">
+        <!-- Login Form -->
+        <form id="portal-login-form">
+          <h2 style="color: var(--secondary); margin-bottom: 10px;">Secretary Login</h2>
+          <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 25px;">Manage your club events seamlessly.</p>
+          <div id="login-error" style="color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none; text-align: center; font-weight: 700;"></div>
+          <div class="input-grp">
+            <label>Secretary Name</label>
+            <input type="text" id="log-name" placeholder="Mukul" required />
+          </div>
+          <div class="input-grp">
+            <label>Registration Number</label>
+            <input type="text" id="log-regNo" placeholder="22218" required />
+          </div>
+          <div class="input-grp">
+            <label>Password</label>
+            <input type="password" id="log-pass" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="submit-btn" id="login-btn">Launch Dashboard</button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="portal-register-form" style="display: none;">
+          <h2 style="color: var(--secondary); margin-bottom: 10px;">Club Onboarding</h2>
+          <div class="input-grp" id="portal-reg-code-block">
+            <label>Registration Access Code</label>
+            <input type="password" id="reg-access-code" placeholder="Enter access code" required />
+          </div>
+          <button id="portal-verify-btn" type="button" class="submit-btn" style="margin-bottom:15px;" onclick="verifyPortalCode()">Verify Code</button>
+
+          <div id="portal-reg-details" style="display:none;">
+            <div class="input-grp">
+              <label>Choose Your Club</label>
+              <select id="reg-club" required>
+                <option value="" disabled selected>-- Select Club --</option>
+                <option value="OSS Club">OSS Club</option>
+                <option value="COE: AI,Robotics">COE: AI,Robotics</option>
+                <option value="Competitive Programming">Competitive Programming</option>
+                <option value="Cultural Board">Cultural Board</option>
+                <option value="Cycling Club">Cycling Club</option>
+                <option value="DDQ Club">DDQ Club</option>
+                <option value="EV Club">EV Club</option>
+                <option value="Film Club">Film Club</option>
+                <option value="GDSC Club">GDSC Club</option>
+                <option value="GDXR Club">GDXR Club</option>
+                <option value="ISDF Club">ISDF Club</option>
+                <option value="Magboard">Magboard</option>
+                <option value="NCC">NCC</option>
+                <option value="NSS Club">NSS Club</option>
+                <option value="Public and Relations Cell">Public and Relations Cell</option>
+                <option value="Radio Club">Radio Club</option>
+                <option value="Research and Development Club">Research and Development Club</option>
+                <option value="SAE Collegative Club">SAE Collegative Club</option>
+                <option value="Spiritual Club">Spiritual Club</option>
+                <option value="Sports Club">Sports Club</option>
+                <option value="Technical Board">Technical Board</option>
+              </select>
+            </div>
+            <div class="input-grp">
+              <label>Your Full Name</label>
+              <input type="text" id="reg-name" required />
+            </div>
+            <div class="input-grp">
+              <label>Registration Number</label>
+              <input type="text" id="reg-reg" required />
+            </div>
+            <div class="input-grp">
+              <label>Email Address</label>
+              <input type="email" id="reg-email" required />
+            </div>
+            <div class="input-grp">
+              <label>Phone Number</label>
+              <input type="tel" id="reg-phone" placeholder="+91XXXXXXXXXX" required />
+            </div>
+            <div class="input-grp">
+              <label>Set Password</label>
+              <input type="password" id="reg-pass" required />
+            </div>
+            <button id="portal-reg-submit" type="submit" class="submit-btn">Complete Setup</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="portal-new-club-fab" id="portal-new-club-fab" style="display:none;">
+        <button type="button" class="new-club-link" onclick="openPortalNewClubModal()">+ New Club</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- DASHBOARD VIEW -->
+  <main id="dashboard-view">
+    <aside class="sidebar">
+      <div class="club-header">
+        <h2 id="dash-club-name">Club Name</h2>
+        <p id="dash-sec-name">Sec: Name</p>
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item active" id="menu-total" onclick="switchTab('total')">Total Events <span class="badge" id="c-total">0</span></li>
+        <li class="menu-item" id="menu-ongoing" onclick="switchTab('ongoing')">Ongoing <span class="badge" id="c-ong">0</span></li>
+        <li class="menu-item" id="menu-upcoming" onclick="switchTab('upcoming')">Upcoming <span class="badge" id="c-upc">0</span></li>
+        <li class="menu-item" id="menu-teams" onclick="switchTab('teams')">Team Entries <span class="badge" id="c-team">0</span></li>
+        <li class="menu-item" id="menu-join" onclick="switchTab('join')">Join Applications <span class="badge" id="c-join">0</span></li>
+        <li class="menu-item" onclick="openClubMeetModal()" style="background: rgba(245, 158, 11, 0.18); color: var(--secondary);">Club Meet Form</li>
+        <li class="menu-item" id="menu-sett" onclick="switchTab('sett')" style="margin-top:20px; border-top: 1px solid #334155; padding-top:20px;">⚙️ Settings</li>
+      </ul>
+      <button class="submit-btn" style="margin-top:30px; background: var(--success);" onclick="document.getElementById('ev-modal').style.display='flex'">+ New Event</button>
+    </aside>
+
+    <section class="content-card">
+      <div id="sync-alert" class="success-alert">✅ DATABASE SYNCED GLOBALLY</div>
+      <div style="margin-bottom:35px;">
+        <h2 id="view-title" style="margin:0;">All Events</h2>
+      </div>
+      
+      <div id="event-list"></div>
+
+      <!-- Settings Panel -->
+      <div id="settings-panel" style="display:none;">
+        <div class="input-grp"><label>Secretary 1</label><input type="text" id="s-sec1" /></div>
+        <div class="input-grp"><label>Secretary 2</label><input type="text" id="s-sec2" /></div>
+        <div class="input-grp"><label>Club Description</label><textarea id="s-desc" rows="6"></textarea></div>
+        <div class="toggle-row">
+          <input type="checkbox" id="allow-join" />
+          <label for="allow-join" style="margin:0; font-size:13px; text-transform:none; color:var(--text-main);">Show Join Club button publicly</label>
+        </div>
+        <button class="submit-btn" onclick="saveSettings()">Apply Global Changes</button>
+        <div style="margin-top:24px; padding-top:20px; border-top:1px solid #334155;">
+          <h3 style="margin:0 0 12px; color: var(--secondary);">Club Meet Notification</h3>
+          <p style="margin:0 0 16px; color:var(--text-dim); font-size:13px;">Call members for a club meet by setting time and place. This notification auto-expires after 24 hours.</p>
+          <p style="margin:0; color:var(--text-dim); font-size:12px;">Use the Club Meet Form button in the sidebar below Join Applications.</p>
+        </div>
+        
+        <!-- DANGER ZONE -->
+        <div style="margin-top: 50px; padding: 30px; border: 2px dashed rgba(239, 68, 68, 0.3); border-radius: 20px; background: rgba(239, 68, 68, 0.05);">
+          <h3 style="color: var(--danger); margin-bottom: 10px;">Danger Zone</h3>
+          <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Deleting your secretary account will remove your login credentials and management access for this club.</p>
+          <button class="btn-sm btn-red" style="width: 100%; padding: 15px; margin-bottom:10px;" onclick="deleteCurrentClub()">Delete This Club (PIN Required)</button>
+          <button class="btn-sm btn-red" style="width: 100%; padding: 15px;" onclick="deleteAccount()">Delete Secretary Account Permanently</button>
+        </div>
+      </div>
+
+      <div id="teams-panel" style="display:none;"></div>
+      <div id="join-panel" style="display:none;"></div>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+  <div id="ev-modal" class="modal">
+    <div class="modal-box">
+      <h2 style="margin-bottom:25px;">Add Event</h2>
+      <form id="add-evt-form">
+        <div class="input-grp"><label>Title</label><input type="text" id="ev-title" required /></div>
+        <div class="input-grp"><label>Date</label><input type="date" id="ev-date" required /></div>
+        <div class="input-grp"><label>Time</label><input type="time" id="ev-time" required /></div>
+        <div class="input-grp"><label>Place</label><input type="text" id="ev-place" placeholder="Seminar Hall / Lab / Ground" required /></div>
+        <div class="input-grp">
+          <label>Status</label>
+          <select id="ev-status">
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="past">Past</option>
+          </select>
+        </div>
+        <div class="input-grp"><label>Description</label><textarea id="ev-desc" rows="3" required></textarea></div>
+        <div style="display:flex; gap:15px;">
+          <button type="button" onclick="document.getElementById('ev-modal').style.display='none'" class="submit-btn" style="background:#334155;">Cancel</button>
+          <button type="submit" class="submit-btn" style="background: var(--success);">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="club-meet-modal" class="modal">
+    <div class="modal-box">
+      <h2 style="margin-bottom:20px;">Club Meet Notification</h2>
+      <p style="margin:0 0 16px; color:var(--text-dim); font-size:13px;">Set time and place to notify members. Notification auto-expires after 24 hours.</p>
+      <div class="input-grp"><label>Meet Time</label><input type="datetime-local" id="meet-time" /></div>
+      <div class="input-grp"><label>Meet Place</label><input type="text" id="meet-place" placeholder="Seminar Hall / Classroom / Lab" /></div>
+      <div class="input-grp"><label>Message (Optional)</label><textarea id="meet-note" rows="3" placeholder="Agenda or additional instructions"></textarea></div>
+      <div style="display:flex; gap:15px;">
+        <button type="button" class="submit-btn" style="background:#334155;" onclick="closeClubMeetModal()">Cancel</button>
+        <button type="button" class="submit-btn" style="background: var(--secondary);" onclick="publishClubMeetNotification()">Send Notification</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="portal-new-club-modal" class="modal">
+    <div class="modal-box">
+      <h2 style="margin-bottom:20px;">Create New Club</h2>
+      <div class="input-grp">
+        <label>Club Name</label>
+        <input type="text" id="portal-new-club-name" placeholder="Enter club name" />
+      </div>
+      <div style="display:flex; gap:15px;">
+        <button type="button" onclick="closePortalNewClubModal()" class="submit-btn" style="background:#334155;">Cancel</button>
+        <button type="button" onclick="createPortalNewClub()" class="submit-btn" style="background:#3b82f6;">Create Club</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const HOME_NOTIFICATION_KEY = 'home_ongoing_notifications';
+    const CLUB_MEET_NOTIFICATION_KEY = 'club_meet_notifications';
+    const INTERVIEW_NOTIFICATION_KEY = 'interview_notifications';
+    const NOTIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+    const CUSTOM_CLUBS_KEY = 'customClubs';
+    const DELETED_BASE_CLUBS_KEY = 'deletedBaseClubs';
+    const SECRETARY_PURGE_KEY = 'secretariesDataPurge_v1';
+    const REGISTRATION_PIN = '250695';
+    const BASE_CLUBS = [
+      'COE: AI,Robotics', 'Competitive Programming', 'Cultural Board', 'Cycling Club',
+      'DDQ Club', 'EV Club', 'Film Club', 'GDSC Club', 'GDXR Club', 'ISDF Club',
+      'Magboard', 'NCC', 'NSS Club', 'OSS Club', 'Public and Relations Cell',
+      'Radio Club', 'Research and Development Club', 'SAE Collegative Club',
+      'Spiritual Club', 'Sports Club', 'Technical Board'
+    ];
+    const $ = (id) => document.getElementById(id);
+    let currentUser = JSON.parse(localStorage.getItem('loggedSecretary'));
+    let events = [];
+    let registrations = [];
+    let joinApplications = [];
+    let activeEntryEventId = null;
+    const navbar = document.querySelector('.navbar');
+
+    function sanitizeLegacySecretaryDetails() {
+      if (!localStorage.getItem(SECRETARY_PURGE_KEY)) {
+        localStorage.removeItem('secretaries');
+        localStorage.removeItem('loggedSecretary');
+        localStorage.removeItem('lastActiveClub');
+        localStorage.setItem(SECRETARY_PURGE_KEY, '1');
+        currentUser = null;
+      }
+
+      Object.keys(localStorage).forEach((key) => {
+        if (!key.startsWith('clubInfo_')) return;
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return;
+
+        if (Object.prototype.hasOwnProperty.call(data, 'email') || Object.prototype.hasOwnProperty.call(data, 'phone')) {
+          delete data.email;
+          delete data.phone;
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+      });
+
+      const db = (JSON.parse(localStorage.getItem('secretaries')) || []).map((s) => ({
+        name: s.name,
+        regNo: s.regNo,
+        password: s.password,
+        club: s.club
+      }));
+      localStorage.setItem('secretaries', JSON.stringify(db));
+
+      if (currentUser) {
+        currentUser = { name: currentUser.name, regNo: currentUser.regNo, password: currentUser.password, club: currentUser.club };
+        localStorage.setItem('loggedSecretary', JSON.stringify(currentUser));
+      }
+    }
+
+    sanitizeLegacySecretaryDetails();
+
+    function getActiveHomeNotifications() {
+      const now = Date.now();
+      const all = JSON.parse(localStorage.getItem(HOME_NOTIFICATION_KEY)) || [];
+      const active = all.filter(item => item && item.createdAt && (now - item.createdAt) <= NOTIFICATION_TTL_MS);
+      localStorage.setItem(HOME_NOTIFICATION_KEY, JSON.stringify(active));
+      return active;
+    }
+
+    function addHomeNotificationForEvent(eventObj) {
+      if (!eventObj || eventObj.status !== 'ongoing') return;
+      const active = getActiveHomeNotifications();
+      active.unshift({
+        id: eventObj.id,
+        club: currentUser.club,
+        title: eventObj.name,
+        desc: eventObj.desc,
+        date: eventObj.date,
+        time: eventObj.time,
+        place: eventObj.place,
+        createdAt: Date.now()
+      });
+      localStorage.setItem(HOME_NOTIFICATION_KEY, JSON.stringify(active));
+    }
+
+    function getActiveClubMeetNotifications() {
+      const now = Date.now();
+      const all = JSON.parse(localStorage.getItem(CLUB_MEET_NOTIFICATION_KEY)) || [];
+      const active = all.filter(item => item && item.createdAt && (now - item.createdAt) <= NOTIFICATION_TTL_MS);
+      localStorage.setItem(CLUB_MEET_NOTIFICATION_KEY, JSON.stringify(active));
+      return active;
+    }
+
+    function getActiveInterviewNotifications() {
+      const now = Date.now();
+      const all = JSON.parse(localStorage.getItem(INTERVIEW_NOTIFICATION_KEY)) || [];
+      const active = all.filter(item => item && item.createdAt && (now - item.createdAt) <= NOTIFICATION_TTL_MS);
+      localStorage.setItem(INTERVIEW_NOTIFICATION_KEY, JSON.stringify(active));
+      return active;
+    }
+
+    function getSafeClubName() {
+      return currentUser.club.replace(/[^a-zA-Z0-9]/g, '_');
+    }
+
+    function saveRegistrations() {
+      const safeName = getSafeClubName();
+      localStorage.setItem(`registrations_${safeName}`, JSON.stringify(registrations));
+    }
+
+    function getAllClubs() {
+      const deletedBase = JSON.parse(localStorage.getItem(DELETED_BASE_CLUBS_KEY)) || [];
+      const custom = JSON.parse(localStorage.getItem(CUSTOM_CLUBS_KEY)) || [];
+      const merged = BASE_CLUBS.filter((club) => !deletedBase.some((d) => String(d).toLowerCase() === String(club).toLowerCase()));
+      custom.forEach((club) => {
+        if (!club || typeof club !== 'string') return;
+        if (!merged.some((c) => c.toLowerCase() === club.toLowerCase())) merged.push(club);
+      });
+      return merged;
+    }
+
+    function populatePortalClubDropdown() {
+      const select = $('reg-club');
+      if (!select) return;
+      const prev = select.value;
+      const clubs = getAllClubs();
+
+      select.innerHTML = '<option value="" disabled selected>-- Select Club --</option>';
+      clubs.forEach((club) => {
+        const opt = document.createElement('option');
+        opt.value = club;
+        opt.textContent = club;
+        select.appendChild(opt);
+      });
+
+      if (prev && clubs.includes(prev)) select.value = prev;
+    }
+
+    function createNewClub(clubNameRaw) {
+      const clubName = (clubNameRaw || '').trim();
+      if (!clubName) return false;
+
+      const normalized = clubName.toLowerCase();
+      const safeName = clubName.replace(/[^a-zA-Z0-9]/g, '_');
+      const cKey = `clubInfo_${safeName}`;
+      let deletedBase = JSON.parse(localStorage.getItem(DELETED_BASE_CLUBS_KEY)) || [];
+      const isBaseClub = BASE_CLUBS.some((c) => String(c).toLowerCase() === normalized);
+      const isDeletedBaseClub = deletedBase.some((c) => String(c).toLowerCase() === normalized);
+
+      const ensureClubRecord = () => {
+        localStorage.setItem(cKey, JSON.stringify({
+          club: clubName,
+          description: 'Newly formed club.',
+          allowJoin: false
+        }));
+      };
+
+      // Backward-compatibility: treat old deletions (before deletedBaseClubs key existed) as restorable.
+      const hasClubInfo = !!localStorage.getItem(cKey);
+      const hasEvents = (JSON.parse(localStorage.getItem(`events_${safeName}`)) || []).length > 0;
+      const hasRegistrations = (JSON.parse(localStorage.getItem(`registrations_${safeName}`)) || []).length > 0;
+      const hasJoinApps = (JSON.parse(localStorage.getItem(`joinApplications_${safeName}`)) || []).length > 0;
+      const hasSecretaryForClub = (JSON.parse(localStorage.getItem('secretaries')) || [])
+        .some((u) => String(u.club || '').trim().toLowerCase() === normalized);
+      const canRestoreDeletedBase = isBaseClub && (isDeletedBaseClub || (!hasClubInfo && !hasEvents && !hasRegistrations && !hasJoinApps && !hasSecretaryForClub));
+
+      if (canRestoreDeletedBase) {
+        deletedBase = deletedBase.filter((c) => String(c).toLowerCase() !== normalized);
+        localStorage.setItem(DELETED_BASE_CLUBS_KEY, JSON.stringify(deletedBase));
+        ensureClubRecord();
+        populatePortalClubDropdown();
+        alert('Club recreated successfully. It will now appear in Clubs section.');
+        return true;
+      }
+
+      const customClubs = JSON.parse(localStorage.getItem(CUSTOM_CLUBS_KEY)) || [];
+      const allClubs = getAllClubs().map((c) => String(c).toLowerCase());
+      if (allClubs.includes(normalized)) {
+        alert('This club already exists.');
+        return false;
+      }
+
+      customClubs.push(clubName);
+      localStorage.setItem(CUSTOM_CLUBS_KEY, JSON.stringify(customClubs));
+
+      populatePortalClubDropdown();
+      ensureClubRecord();
+
+      alert('New club created. It will now appear in Clubs section.');
+      return true;
+    }
+
+    function setPortalRegisterUnlocked(unlocked) {
+      const block = $('portal-reg-details');
+      $('portal-reg-code-block').style.display = unlocked ? 'none' : 'block';
+      $('portal-verify-btn').style.display = unlocked ? 'none' : 'block';
+      if ($('portal-new-club-fab')) $('portal-new-club-fab').style.display = unlocked ? 'block' : 'none';
+      block.style.display = unlocked ? 'block' : 'none';
+      block.querySelectorAll('input, select, textarea, button').forEach((el) => {
+        el.disabled = !unlocked;
+      });
+    }
+
+    function resetPortalRegisterGate() {
+      $('reg-access-code').value = '';
+      setPortalRegisterUnlocked(false);
+    }
+
+    function verifyPortalCode() {
+      if ($('reg-access-code').value.trim() !== REGISTRATION_PIN) {
+        alert('Invalid registration access code.');
+        setPortalRegisterUnlocked(false);
+        return;
+      }
+      setPortalRegisterUnlocked(true);
+      $('reg-club').focus();
+    }
+
+    function toggleAuth(mode) {
+      $('portal-login-form').style.display = mode === 'log' ? 'block' : 'none';
+      $('portal-register-form').style.display = mode === 'reg' ? 'block' : 'none';
+      $('portal-new-club-fab').style.display = 'none';
+      $('tab-log').className = mode === 'log' ? 'auth-tab active' : 'auth-tab';
+      $('tab-reg').className = mode === 'reg' ? 'auth-tab active' : 'auth-tab';
+      if (mode === 'reg') {
+        resetPortalRegisterGate();
+        populatePortalClubDropdown();
+      }
+    }
+
+    function openPortalNewClubModal() {
+      $('portal-new-club-name').value = '';
+      $('portal-new-club-modal').style.display = 'flex';
+      setTimeout(() => $('portal-new-club-name').focus(), 0);
+    }
+
+    function closePortalNewClubModal() {
+      $('portal-new-club-modal').style.display = 'none';
+    }
+
+    function createPortalNewClub() {
+      const name = $('portal-new-club-name').value.trim();
+      const created = createNewClub(name);
+      if (created) {
+        $('reg-club').value = name;
+        closePortalNewClubModal();
+      }
+    }
+
+    function saveJoinApplications() {
+      const safeName = getSafeClubName();
+      localStorage.setItem(`joinApplications_${safeName}`, JSON.stringify(joinApplications));
+    }
+
+    function init() {
+      populatePortalClubDropdown();
+      currentUser ? showDashboard() : showLogin();
+    }
+
+    function showLogin() {
+      navbar.style.top = '0';
+      $('login-view').style.display = 'flex';
+      $('dashboard-view').style.display = 'none';
+      $('nav-logout-li').style.display = 'none';
+    }
+
+    function showDashboard() {
+      navbar.style.top = '0';
+      $('login-view').style.display = 'none';
+      $('dashboard-view').style.display = 'grid';
+      $('nav-logout-li').style.display = 'block';
+      $('dash-club-name').textContent = currentUser.club;
+      $('dash-sec-name').textContent = 'Sec: ' + currentUser.name;
+      
+      // Update persistence
+      localStorage.setItem('lastActiveClub', currentUser.club);
+      
+      loadEvents();
+      switchTab('total');
+    }
+
+    // AUTH LOGIC
+    $('portal-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = $('log-name').value.trim();
+      const regNo = $('log-regNo').value.trim();
+      const pass = $('log-pass').value;
+      let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+      db = db.map((s) => ({ name: s.name, regNo: s.regNo, password: s.password, club: s.club }));
+      localStorage.setItem('secretaries', JSON.stringify(db));
+      
+      const user = db.find(u => u.name.toLowerCase() === name.toLowerCase() && u.regNo === regNo && u.password === pass);
+      if (user) {
+        currentUser = user;
+        localStorage.setItem('loggedSecretary', JSON.stringify(user));
+        showDashboard();
+      } else {
+        const err = $('login-error');
+        err.style.display = 'block';
+        err.textContent = '⚠️ Invalid credentials. Check name, registration number, or password.';
+      }
+    });
+
+    $('portal-register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const accessCode = $('reg-access-code').value.trim();
+      if (accessCode !== '250695') {
+        alert('Invalid registration access code.');
+        return;
+      }
+
+      const club = $('reg-club').value;
+      const name = $('reg-name').value.trim();
+      const reg = $('reg-reg').value.trim();
+      const email = $('reg-email').value.trim();
+      const phone = $('reg-phone').value.trim();
+      const pass = $('reg-pass').value;
+
+      let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+      if (db.find(s => s.regNo === reg)) return alert('Registration number already exists.');
+
+      const newUser = { name, regNo: reg, password: pass, club };
+      db.push(newUser);
+      localStorage.setItem('secretaries', JSON.stringify(db));
+
+      const safeName = club.replace(/[^a-zA-Z0-9]/g, '_');
+      const cKey = `clubInfo_${safeName}`;
+      const existingClubInfo = JSON.parse(localStorage.getItem(cKey)) || {};
+      localStorage.setItem(cKey, JSON.stringify({
+        ...existingClubInfo,
+        club
+      }));
+
+      currentUser = newUser;
+      localStorage.setItem('loggedSecretary', JSON.stringify(newUser));
+      showDashboard();
+    });
+
+    function logout() {
+      localStorage.removeItem('loggedSecretary');
+      currentUser = null;
+      showLogin();
+    }
+
+    // DASHBOARD LOGIC
+    function loadEvents() {
+      const safeName = getSafeClubName();
+      events = JSON.parse(localStorage.getItem(`events_${safeName}`)) || [];
+      registrations = JSON.parse(localStorage.getItem(`registrations_${safeName}`)) || [];
+      joinApplications = JSON.parse(localStorage.getItem(`joinApplications_${safeName}`)) || [];
+      updateCounts();
+    }
+
+    function updateCounts() {
+      $('c-total').textContent = events.length;
+      $('c-ong').textContent = events.filter(e => e.status === 'ongoing').length;
+      $('c-upc').textContent = events.filter(e => e.status === 'upcoming').length;
+      $('c-team').textContent = registrations.length;
+      $('c-join').textContent = joinApplications.length;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+      $('menu-' + tab).classList.add('active');
+      
+      const list = $('event-list');
+      const sett = $('settings-panel');
+      const teams = $('teams-panel');
+      const join = $('join-panel');
+      const title = $('view-title');
+
+      if (tab === 'sett') {
+        list.style.display = 'none';
+        sett.style.display = 'block';
+        teams.style.display = 'none';
+        join.style.display = 'none';
+        title.textContent = 'Club Settings';
+        loadSettings();
+      } else if (tab === 'teams') {
+        list.style.display = 'none';
+        sett.style.display = 'none';
+        teams.style.display = 'block';
+        join.style.display = 'none';
+        title.textContent = 'Team Entries';
+        renderTeamEntries(activeEntryEventId);
+      } else if (tab === 'join') {
+        list.style.display = 'none';
+        sett.style.display = 'none';
+        teams.style.display = 'none';
+        join.style.display = 'block';
+        title.textContent = 'Join Applications';
+        renderJoinApplications();
+      } else {
+        list.style.display = 'block';
+        sett.style.display = 'none';
+        teams.style.display = 'none';
+        join.style.display = 'none';
+        activeEntryEventId = null;
+        title.textContent = tab === 'total' ? 'All Events' : (tab.charAt(0).toUpperCase() + tab.slice(1) + ' Events');
+        renderEvents(tab);
+      }
+    }
+
+    function renderEvents(filter) {
+      const container = $('event-list');
+      container.innerHTML = '';
+      const filtered = filter === 'total' ? events : events.filter(e => e.status === filter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:40px;">No events found in this category.</p>';
+        return;
+      }
+
+      filtered.forEach(e => {
+        const div = document.createElement('div');
+        div.className = 'event-card';
+        div.innerHTML = `
+          <span class="status-tag">${e.status}</span>
+          <div class="event-info">
+            <h3>${e.name}</h3>
+            <p><strong>Date:</strong> ${e.date}</p>
+            <p><strong>Time:</strong> ${e.time || '-'}</p>
+            <p><strong>Place:</strong> ${e.place || '-'}</p>
+            <p>${e.desc}</p>
+            <div class="action-group">
+              <button class="btn-sm btn-blue" onclick="openTeamEntries(${e.id})">Manage Entries</button>
+              <button class="btn-sm btn-red" onclick="deleteEvent(${e.id})">Delete</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openTeamEntries(eventId) {
+      activeEntryEventId = eventId;
+      switchTab('teams');
+    }
+
+    function renderTeamEntries(eventId) {
+      const container = $('teams-panel');
+      container.innerHTML = '';
+
+      const list = eventId ? registrations.filter(r => r.eventId === eventId) : registrations;
+
+      if (list.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:30px;">No team registrations yet for this selection.</p>';
+        return;
+      }
+
+      const grouped = list.reduce((acc, entry) => {
+        const key = String(entry.eventId || 'unknown');
+        if (!acc[key]) {
+          acc[key] = {
+            eventName: entry.eventName || 'Unknown Event',
+            entries: []
+          };
+        }
+        acc[key].entries.push(entry);
+        return acc;
+      }, {});
+
+      Object.values(grouped).forEach(group => {
+        const section = document.createElement('div');
+        section.className = 'team-group';
+
+        const heading = document.createElement('h3');
+        heading.className = 'team-group-title';
+        heading.textContent = group.eventName + ' (' + group.entries.length + ')';
+        section.appendChild(heading);
+
+        group.entries.forEach(entry => {
+          const card = document.createElement('div');
+          card.className = 'team-entry-card';
+          card.innerHTML = `
+            <div class="team-entry-top">
+              <h4>${entry.teamName || 'Unnamed Team'}</h4>
+              <button class="btn-sm btn-red" onclick="deleteEntry(${entry.id})">Delete</button>
+            </div>
+            <p><strong>Student:</strong> ${entry.studentName || '-'}</p>
+            <p><strong>Roll No:</strong> ${entry.regNo || '-'}</p>
+            <p><strong>Email:</strong> ${entry.email || '-'}</p>
+            <p><strong>Registered:</strong> ${entry.registeredAt ? new Date(entry.registeredAt).toLocaleString() : '-'}</p>
+          `;
+          section.appendChild(card);
+        });
+
+        container.appendChild(section);
+      });
+    }
+
+    function deleteEntry(id) {
+      if (!confirm('Delete this team entry?')) return;
+      registrations = registrations.filter(r => r.id !== id);
+      saveRegistrations();
+      updateCounts();
+      renderTeamEntries(activeEntryEventId);
+      flashSync();
+    }
+
+    function renderJoinApplications() {
+      const container = $('join-panel');
+      container.innerHTML = '';
+      if (!joinApplications.length) {
+        container.innerHTML = '<p style="color:var(--text-dim); text-align:center; padding:30px;">No join applications yet.</p>';
+        return;
+      }
+
+      const controls = document.createElement('div');
+      controls.style.marginBottom = '14px';
+      controls.innerHTML = `
+        <div class="input-grp"><label>Interview Time</label><input type="datetime-local" id="interview-time" /></div>
+        <div class="input-grp"><label>Interview Place</label><input type="text" id="interview-place" placeholder="Room/Lab name" /></div>
+        <button class="submit-btn" style="max-width:320px;" onclick="sendInterviewNotifications()">Send Interview Notification</button>
+      `;
+      container.appendChild(controls);
+
+      joinApplications.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'join-app-card';
+        card.innerHTML = `
+          <p><input type="checkbox" class="join-select" value="${app.id}" /> <strong>Select candidate</strong></p>
+          <p><strong>Name:</strong> ${app.name || '-'}</p>
+          <p><strong>Reg No:</strong> ${app.regNo || '-'}</p>
+          <p><strong>Email:</strong> ${app.email || '-'}</p>
+          <p><strong>Phone:</strong> ${app.phone || '-'}</p>
+          <p><strong>Message:</strong> ${app.message || '-'}</p>
+          <p><strong>Applied:</strong> ${app.createdAt ? new Date(app.createdAt).toLocaleString() : '-'}</p>
+          <div class="action-group" style="margin-top:10px;">
+            <button class="btn-sm btn-red" onclick="deleteJoinApplication(${app.id})">Remove</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function sendInterviewNotifications() {
+      const selectedIds = Array.from(document.querySelectorAll('.join-select:checked')).map(c => Number(c.value));
+      if (!selectedIds.length) return alert('Select at least one candidate.');
+
+      const interviewTime = $('interview-time') ? $('interview-time').value : '';
+      const interviewPlace = $('interview-place') ? $('interview-place').value.trim() : '';
+      if (!interviewTime || !interviewPlace) return alert('Please add interview time and place.');
+
+      const selected = joinApplications.filter(a => selectedIds.includes(a.id));
+      const notif = getActiveInterviewNotifications();
+      notif.unshift({
+        id: Date.now(),
+        club: currentUser.club,
+        candidates: selected.map(app => ({ name: app.name, regNo: app.regNo })),
+        interviewTime,
+        interviewPlace,
+        createdAt: Date.now()
+      });
+
+      localStorage.setItem(INTERVIEW_NOTIFICATION_KEY, JSON.stringify(notif));
+      alert('Interview notification sent to selected candidates.');
+      flashSync();
+    }
+
+    function deleteJoinApplication(id) {
+      if (!confirm('Remove this join application?')) return;
+      joinApplications = joinApplications.filter(a => a.id !== id);
+      saveJoinApplications();
+      updateCounts();
+      renderJoinApplications();
+      flashSync();
+    }
+
+    // SETTINGS
+    function loadSettings() {
+      const safeName = getSafeClubName();
+      const cKey = `clubInfo_${safeName}`;
+      const data = JSON.parse(localStorage.getItem(cKey)) || {};
+      const sec1 = (data.secretaryName || '').trim();
+      $('s-sec1').value = sec1 || currentUser.name;
+      $('s-sec2').value = data.coSecretary || '';
+      $('s-desc').value = data.description || '';
+      $('allow-join').checked = !!data.allowJoin;
+
+      if ($('meet-time')) $('meet-time').value = '';
+      if ($('meet-place')) $('meet-place').value = '';
+      if ($('meet-note')) $('meet-note').value = '';
+    }
+
+    function saveSettings() {
+      const safeName = getSafeClubName();
+      const cKey = `clubInfo_${safeName}`;
+      const primarySecretary = ($('s-sec1').value || '').trim() || currentUser.name;
+      const data = {
+        secretaryName: primarySecretary,
+        coSecretary: $('s-sec2').value,
+        description: $('s-desc').value,
+        allowJoin: $('allow-join').checked,
+        club: currentUser.club
+      };
+      localStorage.setItem(cKey, JSON.stringify(data));
+      $('dash-sec-name').textContent = 'Sec: ' + currentUser.name;
+      flashSync();
+    }
+
+    function publishClubMeetNotification() {
+      const meetTime = $('meet-time') ? $('meet-time').value : '';
+      const meetPlace = $('meet-place') ? $('meet-place').value.trim() : '';
+      const meetNote = $('meet-note') ? $('meet-note').value.trim() : '';
+
+      if (!meetTime || !meetPlace) {
+        alert('Please provide meet time and place.');
+        return;
+      }
+
+      const active = getActiveClubMeetNotifications();
+      active.unshift({
+        id: Date.now(),
+        type: 'club-meet',
+        club: currentUser.club,
+        title: 'Club Meet Call',
+        time: meetTime,
+        place: meetPlace,
+        desc: meetNote || 'Club meeting notification posted by secretary.',
+        createdAt: Date.now()
+      });
+
+      localStorage.setItem(CLUB_MEET_NOTIFICATION_KEY, JSON.stringify(active));
+      alert('Club meet notification published for 24 hours.');
+      if ($('meet-time')) $('meet-time').value = '';
+      if ($('meet-place')) $('meet-place').value = '';
+      if ($('meet-note')) $('meet-note').value = '';
+      closeClubMeetModal();
+      flashSync();
+    }
+
+    function openClubMeetModal() {
+      if ($('meet-time')) $('meet-time').value = '';
+      if ($('meet-place')) $('meet-place').value = '';
+      if ($('meet-note')) $('meet-note').value = '';
+      $('club-meet-modal').style.display = 'flex';
+    }
+
+    function closeClubMeetModal() {
+      $('club-meet-modal').style.display = 'none';
+    }
+
+    function flashSync() {
+      const alert = $('sync-alert');
+      alert.style.display = 'block';
+      setTimeout(() => alert.style.display = 'none', 3000);
+    }
+
+    // EVENTS CRUD
+    $('add-evt-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newEv = {
+        id: Date.now(),
+        name: $('ev-title').value,
+        date: $('ev-date').value,
+        time: $('ev-time').value,
+        place: $('ev-place').value.trim(),
+        status: $('ev-status').value,
+        desc: $('ev-desc').value
+      };
+      events.push(newEv);
+      addHomeNotificationForEvent(newEv);
+      const safeName = getSafeClubName();
+      localStorage.setItem(`events_${safeName}`, JSON.stringify(events));
+      $('ev-modal').style.display = 'none';
+      $('add-evt-form').reset();
+      updateCounts();
+      switchTab('total');
+      flashSync();
+    });
+
+    function deleteEvent(id) {
+      if (!confirm('Are you sure you want to delete this event?')) return;
+      events = events.filter(e => e.id !== id);
+      registrations = registrations.filter(r => r.eventId !== id);
+      const safeName = getSafeClubName();
+      localStorage.setItem(`events_${safeName}`, JSON.stringify(events));
+      saveRegistrations();
+      updateCounts();
+      renderEvents(document.querySelector('.menu-item.active').id.split('-')[1]);
+      flashSync();
+    }
+
+    function deleteCurrentClub() {
+      const pin = prompt('Enter PIN to delete this club from the whole site:');
+      if (pin !== REGISTRATION_PIN) {
+        alert('Invalid PIN. Club was not deleted.');
+        return;
+      }
+
+      if (!confirm(`Delete ${currentUser.club} from the whole site? This cannot be undone.`)) return;
+
+      const clubName = String(currentUser.club || '').trim();
+      const safeName = clubName.replace(/[^a-zA-Z0-9]/g, '_');
+
+      localStorage.removeItem(`events_${safeName}`);
+      localStorage.removeItem(`clubInfo_${safeName}`);
+      localStorage.removeItem(`registrations_${safeName}`);
+      localStorage.removeItem(`joinApplications_${safeName}`);
+      localStorage.removeItem(`events_${clubName}`);
+      localStorage.removeItem(`clubInfo_${clubName}`);
+      localStorage.removeItem(`registrations_${clubName}`);
+      localStorage.removeItem(`joinApplications_${clubName}`);
+
+      let custom = JSON.parse(localStorage.getItem(CUSTOM_CLUBS_KEY)) || [];
+      custom = custom.filter((c) => String(c).toLowerCase() !== clubName.toLowerCase());
+      localStorage.setItem(CUSTOM_CLUBS_KEY, JSON.stringify(custom));
+
+      if (BASE_CLUBS.some((c) => String(c).toLowerCase() === clubName.toLowerCase())) {
+        let deletedBase = JSON.parse(localStorage.getItem(DELETED_BASE_CLUBS_KEY)) || [];
+        if (!deletedBase.some((c) => String(c).toLowerCase() === clubName.toLowerCase())) {
+          deletedBase.push(clubName);
+          localStorage.setItem(DELETED_BASE_CLUBS_KEY, JSON.stringify(deletedBase));
+        }
+      }
+
+      let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+      db = db.filter((u) => String(u.club || '').toLowerCase() !== clubName.toLowerCase());
+      localStorage.setItem('secretaries', JSON.stringify(db));
+
+      let homeNotifs = JSON.parse(localStorage.getItem(HOME_NOTIFICATION_KEY)) || [];
+      homeNotifs = homeNotifs.filter((n) => String(n.club || '').toLowerCase() !== clubName.toLowerCase());
+      localStorage.setItem(HOME_NOTIFICATION_KEY, JSON.stringify(homeNotifs));
+
+      let meetNotifs = JSON.parse(localStorage.getItem(CLUB_MEET_NOTIFICATION_KEY)) || [];
+      meetNotifs = meetNotifs.filter((n) => String(n.club || '').toLowerCase() !== clubName.toLowerCase());
+      localStorage.setItem(CLUB_MEET_NOTIFICATION_KEY, JSON.stringify(meetNotifs));
+
+      let interviewNotifs = JSON.parse(localStorage.getItem(INTERVIEW_NOTIFICATION_KEY)) || [];
+      interviewNotifs = interviewNotifs.filter((n) => String(n.club || '').toLowerCase() !== clubName.toLowerCase());
+      localStorage.setItem(INTERVIEW_NOTIFICATION_KEY, JSON.stringify(interviewNotifs));
+
+      if (localStorage.getItem('lastActiveClub') === clubName) {
+        localStorage.removeItem('lastActiveClub');
+      }
+
+      alert('Club deleted from the whole site successfully.');
+      logout();
+    }
+
+    // ACCOUNT DELETION
+    function deleteAccount() {
+      const confirmText = prompt(`Type "DELETE ${currentUser.club}" to confirm account deletion:`);
+      const normalizedClub = String(currentUser.club || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const provided = String(confirmText || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const accepted = new Set([
+        'delete',
+        'delete account',
+        'delete my account',
+        `delete ${normalizedClub}`.trim()
+      ]);
+
+      if (!accepted.has(provided)) {
+        alert(`Confirmation failed. Account not deleted.\nType "DELETE ${currentUser.club}" or just "DELETE".`);
+        return;
+      }
+
+      if (!confirm("Are you ABSOLUTELY sure? This cannot be undone.")) return;
+
+      let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+      db = db.filter(u => u.regNo !== currentUser.regNo);
+      localStorage.setItem('secretaries', JSON.stringify(db));
+
+      // Optional: Delete club data
+      if (confirm("Do you also want to WIPE all events and club info from the public site?")) {
+        const safeName = getSafeClubName();
+        localStorage.removeItem(`events_${safeName}`);
+        localStorage.removeItem(`clubInfo_${safeName}`);
+        localStorage.removeItem(`registrations_${safeName}`);
+        localStorage.removeItem(`joinApplications_${safeName}`);
+      }
+
+      alert("Account deleted successfully.");
+      logout();
+    }
+
+    // Run on boot
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>Clubs V6 | Eventify</title>
+    <link rel="stylesheet" href="style.css?v=6.0" />
+    <style>
+      body { background: #020617; color: white; font-family: 'Segoe UI', sans-serif; }
+      .clubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px; max-width: 1400px; margin: 0 auto; }
+      .club-card { background: #0f172a; border: 1px solid #334155; border-radius: 20px; padding: 30px; transition: 0.3s; position: relative; overflow: hidden; }
+      .club-card:hover { transform: translateY(-8px); border-color: #a855f7; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+      .club-card h3 { color: #f8fafc; margin-bottom: 15px; font-size: 1.5rem; border-left: 4px solid #a855f7; padding-left: 12px; }
+      .club-card p.desc { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px; min-height: 80px; }
+      .sec-box { background: rgba(168, 85, 247, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 25px; border: 1px dashed rgba(168, 85, 247, 0.3); }
+      .sec-box span { display: block; font-size: 0.75rem; color: #a855f7; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+      .sec-box strong { font-size: 0.95rem; color: #f1f5f9; display: block; margin-bottom: 8px; }
+      .sec-box strong:last-child { margin-bottom: 0; }
+      .card-btns { display: flex; gap: 10px; }
+      .btn { flex: 1; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 0.9rem; text-align: center; transition: 0.3s; }
+      .btn-primary { background: #a855f7; color: white; box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3); }
+      .btn-primary:hover { background: #9333ea; transform: scale(1.02); }
+      .btn-secondary { background: #1e293b; color: white; border: 1px solid #334155; }
+      .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.82); display: none; justify-content: center; align-items: center; z-index: 100001; }
+      .modal-box { width: 92%; max-width: 470px; background: #0f172a; border: 1px solid #334155; border-radius: 16px; padding: 24px; }
+      .modal-box h3 { margin-bottom: 16px; }
+      .modal-box input, .modal-box textarea { width: 100%; margin-bottom: 10px; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #111827; color: #fff; }
+      .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+      .btn-modal { flex: 1; padding: 10px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <header>
+      <nav class="navbar">
+          <h1>Eventify</h1>
+          <ul class="nav-links">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="clubs-v5.html" class="active">Clubs</a></li>
+              <li><a href="contact.html">Contact</a></li>
+              <li><a href="portal-unified.html" id="nav-login-link">Login</a></li>
+          </ul>
+      </nav>
+    </header>
+
+    <div style="text-align: center; padding: 80px 20px; background: radial-gradient(circle at top, #1e1b4b 0%, #020617 100%);">
+       <h1 style="font-size: 4rem; margin-bottom: 15px; letter-spacing: -1px;">Campus <span style="color: #a855f7;">Communities</span></h1>
+       <p style="color: #94a3b8; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">Connect with the leaders and visionaries behind your favorite institute clubs.</p>
+    </div>
+
+    <div class="clubs-grid" id="clubs-grid">
+      <script>
+        const baseClubs = [
+          "COE: AI,Robotics", "Competitive Programming", "Cultural Board", "Cycling Club",
+          "DDQ Club", "EV Club", "Film Club", "GDSC Club", "GDXR Club", "ISDF Club",
+          "Magboard", "NCC", "NSS Club", "OSS Club", "Public and Relations Cell",
+          "Radio Club", "Research and Development Club", "SAE Collegative Club",
+          "Spiritual Club", "Sports Club", "Technical Board"
+        ];
+
+        const customClubs = JSON.parse(localStorage.getItem('customClubs')) || [];
+        const clubs = [...baseClubs];
+        customClubs.forEach((club) => {
+          if (!club || typeof club !== 'string') return;
+          if (!clubs.some((c) => c.toLowerCase() === club.toLowerCase())) clubs.push(club);
+        });
+        
+        clubs.forEach(name => {
+          const sName = name.replace(/[^a-zA-Z0-9]/g, '_');
+          document.write(`
+            <div class="club-card" data-club="${name}">
+              <h3>${name}</h3>
+              <p class="desc">Loading club mission and updates...</p>
+
+              <div class="sec-box">
+                <span>Club Secretariat</span>
+                <strong id="sec1-${sName}">Syncing...</strong>
+                <strong id="sec2-${sName}" style="border-top: 1px solid rgba(168, 85, 247, 0.2); padding-top: 8px; display:none;">Waiting for second secretary...</strong>
+              </div>
+              <div class="card-btns">
+                <a href="Events.html?club=${encodeURIComponent(name)}" class="btn btn-primary">Event Details</a>
+                <a href="#" class="btn btn-secondary contact-link" data-club="${name}">Contact</a>
+                <a href="#" class="btn btn-secondary join-link" data-club="${name}" style="display:none;">Join Club</a>
+              </div>
+            </div>
+          `);
+        });
+      </script>
+    </div>
+
+    <div id="join-modal" class="modal">
+      <div class="modal-box">
+        <h3 id="join-modal-title">Join Club</h3>
+        <form id="join-form">
+          <input type="text" id="join-name" placeholder="Your Full Name" required />
+          <input type="text" id="join-reg" placeholder="Registration Number" required />
+          <input type="email" id="join-email" placeholder="Email" required />
+          <input type="tel" id="join-phone" placeholder="Phone Number" required />
+          <textarea id="join-msg" rows="3" placeholder="Why do you want to join?" required></textarea>
+          <div class="modal-actions">
+            <button type="button" class="btn-modal" style="background:#334155; color:white;" onclick="closeJoinModal()">Cancel</button>
+            <button type="submit" class="btn-modal" style="background:#10b981; color:white;">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const joinModal = document.getElementById('join-modal');
+        const joinForm = document.getElementById('join-form');
+        let selectedClub = '';
+
+        window.openJoinModal = function(club) {
+          selectedClub = club;
+          document.getElementById('join-modal-title').textContent = 'Join ' + club;
+          joinForm.reset();
+          joinModal.style.display = 'flex';
+        };
+
+        window.closeJoinModal = function() {
+          joinModal.style.display = 'none';
+          selectedClub = '';
+        };
+
+        joinForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          if (!selectedClub) return;
+          const safe = selectedClub.replace(/[^a-zA-Z0-9]/g, '_');
+          const key = `joinApplications_${safe}`;
+          const apps = JSON.parse(localStorage.getItem(key)) || [];
+          const regNo = document.getElementById('join-reg').value.trim();
+
+          if (apps.find(a => (a.regNo || '').toLowerCase() === regNo.toLowerCase())) {
+            alert('You already have a pending application for this club.');
+            return;
+          }
+
+          apps.push({
+            id: Date.now(),
+            club: selectedClub,
+            name: document.getElementById('join-name').value.trim(),
+            regNo,
+            email: document.getElementById('join-email').value.trim(),
+            phone: document.getElementById('join-phone').value.trim(),
+            message: document.getElementById('join-msg').value.trim(),
+            createdAt: Date.now()
+          });
+
+          localStorage.setItem(key, JSON.stringify(apps));
+          alert('Application submitted successfully.');
+          closeJoinModal();
+        });
+
+        const loggedIn = JSON.parse(localStorage.getItem('loggedSecretary'));
+        if (loggedIn) {
+           document.getElementById('nav-login-link').textContent = 'Dashboard';
+           document.getElementById('nav-login-link').href = 'portal-unified.html';
+        }
+
+        window.logout = function() { localStorage.removeItem('loggedSecretary'); window.location.reload(); };
+
+        document.querySelectorAll('.club-card').forEach(card => {
+           const name = card.getAttribute('data-club');
+           const sName = name.replace(/[^a-zA-Z0-9]/g, '_');
+           
+           // Fetch Club Info
+           const infoKey = `clubInfo_${sName}`;
+           const info = JSON.parse(localStorage.getItem(infoKey));
+           
+           // Fetch Events
+           const eventKey = `events_${sName}`;
+           const events = JSON.parse(localStorage.getItem(eventKey)) || [];
+           
+           const p = card.querySelector('.desc');
+           const s1 = document.getElementById(`sec1-${sName}`);
+           const s2 = document.getElementById(`sec2-${sName}`);
+           const cLink = card.querySelector('.contact-link');
+           const jLink = card.querySelector('.join-link');
+            const allSecretaries = JSON.parse(localStorage.getItem('secretaries')) || [];
+            const matchedSecretary = allSecretaries.find((sec) => String(sec.club || '').trim().toLowerCase() === String(name || '').trim().toLowerCase());
+
+           if (info) {
+              if (info.description) p.textContent = info.description;
+              if (info.secretaryName) s1.textContent = "Secretary 1: " + info.secretaryName;
+              else if (matchedSecretary && matchedSecretary.name) s1.textContent = "Secretary 1: " + matchedSecretary.name;
+              else s1.textContent = "Awaiting Secretariat Details";
+              if (info.coSecretary && String(info.coSecretary).trim()) {
+                s2.textContent = "Secretary 2: " + info.coSecretary;
+                s2.style.display = 'block';
+              } else {
+                s2.style.display = 'none';
+              }
+
+              if (info.allowJoin && jLink) {
+                jLink.style.display = 'block';
+                jLink.addEventListener('click', function(ev) {
+                  ev.preventDefault();
+                  openJoinModal(name);
+                });
+              } else if (jLink) {
+                jLink.style.display = 'none';
+              }
+
+              cLink.href = 'contact.html';
+              cLink.textContent = 'Contact';
+           } else {
+              if (matchedSecretary && matchedSecretary.name) s1.textContent = "Secretary 1: " + matchedSecretary.name;
+              else s1.textContent = "Awaiting Secretariat Details";
+              s2.style.display = 'none';
+              if (jLink) jLink.style.display = 'none';
+              cLink.href = 'contact.html';
+           }
+        });
+      })();
+    </script>
+</body>
+</html>

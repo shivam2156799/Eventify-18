@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Secretary Portal | Eventify</title>
+  <style>
+    body.login-body {
+      background: #020617 !important; display: flex; flex-direction: column; min-height: 100vh; color: white;
+    }
+    .sync-proofer { background: #f59e0b; color: black; text-align: center; padding: 12px; font-weight: 800; font-size: 16px; position: sticky; top: 0; z-index: 10000; }
+    .login-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+    .form-card { position: relative; background: #0f172a; border: 1px solid #334155; border-radius: 20px; width: 100%; max-width: 420px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .form-tabs { display: flex; background: #1e293b; border-bottom: 2px solid #a855f7; }
+    .form-tab { flex: 1; padding: 20px; text-align: center; cursor: pointer; font-weight: 800; color: #94a3b8; font-size: 14px; letter-spacing: 1px; transition: 0.3s; }
+    .form-tab.active { color: #f59e0b; background: #0f172a; }
+    .form-content { padding: 35px; }
+    .input-grp { margin-bottom: 20px; }
+    .input-grp label { display: block; font-size: 12px; color: #a855f7; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; }
+    .input-grp input, .input-grp select { width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 10px; color: white; outline: none; }
+    .submit-btn { width: 100%; padding: 16px; background: #a855f7; border: none; border-radius: 10px; color: white; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.3s; }
+    .error-msg { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; font-weight: 600; text-align: center; }
+    .new-club-row { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .new-club-link { background: transparent; border: 1px solid #334155; color: #93c5fd; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .new-club-link:hover { border-color: #60a5fa; color: #dbeafe; }
+    .new-club-fab { position: absolute; right: 14px; bottom: 14px; z-index: 8; }
+    .new-club-fab .new-club-link { background: #0b1220; }
+    .modal { display:none; position:fixed; inset:0; background: rgba(2,6,23,.82); justify-content:center; align-items:center; z-index: 9999; padding: 20px; }
+    .modal-box { width:min(420px, 96vw); background:#0f172a; border:1px solid #334155; border-radius:16px; padding:24px; }
+    .modal-title { margin:0 0 14px 0; color:#f59e0b; font-size: 1.35rem; }
+  </style>
+</head>
+<body class="login-body">
+  <div class="sync-proofer">🚩 VERSION 7: CLASSIC UN-MERGED PANEL ACTIVE 🚩</div>
+
+  <header>
+    <nav class="navbar">
+      <h1>Eventify</h1>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="clubs-v5.html">Clubs</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="login-v7.html" class="active">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="login-container">
+    <div class="form-card">
+      <div class="form-tabs">
+        <div class="form-tab active" id="tab-log" onclick="toggleAuth('log')">SIGN IN</div>
+        <div class="form-tab" id="tab-reg" onclick="toggleAuth('reg')">REGISTER CLUB</div>
+      </div>
+      
+      <div class="form-content">
+        <form id="v7-login-form">
+          <h2 style="color: #f59e0b; margin-bottom: 10px; font-size: 1.8rem;">Secretary Login</h2>
+          <p style="color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Enter your credentials to manage your club.</p>
+          <div id="log-error" class="error-msg"></div>
+          <div class="input-grp">
+            <label>LEAD NAME</label>
+            <input type="text" id="log-name" placeholder="eg. Mukul" required />
+          </div>
+          <div class="input-grp">
+            <label>REGISTRATION NO</label>
+            <input type="text" id="log-regNo" placeholder="eg. 22218" required />
+          </div>
+          <div class="input-grp">
+            <label>PASSWORD</label>
+            <input type="password" id="log-pass" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="submit-btn">Open Dashboard</button>
+        </form>
+
+        <form id="v7-register-form" style="display: none;">
+          <h2 style="color: #f59e0b; margin-bottom: 15px; font-size: 1.8rem;">Portal Signup</h2>
+          <div class="input-grp" id="v7-reg-code-block">
+             <label>REGISTRATION ACCESS CODE</label>
+             <input type="password" id="reg-access-code" placeholder="Enter access code" required />
+          </div>
+          <button id="v7-verify-btn" type="button" class="submit-btn" style="margin-bottom:15px;" onclick="verifyV7Code()">VERIFY CODE</button>
+
+           <div id="v7-reg-details" style="display:none;">
+            <div class="input-grp">
+              <label>CAMPUS CLUB</label>
+              <select id="reg-club" required>
+               <option value="" disabled selected>-- Choose Club --</option>
+               <option value="OSS Club">OSS Club</option>
+               <option value="COE: AI,Robotics">COE: AI,Robotics</option>
+               <option value="Competitive Programming">Competitive Programming</option>
+                <option value="Cultural Board">Cultural Board</option>
+                <option value="Cycling Club">Cycling Club</option>
+                <option value="DDQ Club">DDQ Club</option>
+                <option value="EV Club">EV Club</option>
+                <option value="Film Club">Film Club</option>
+                <option value="GDSC Club">GDSC Club</option>
+                <option value="GDXR Club">GDXR Club</option>
+                <option value="ISDF Club">ISDF Club</option>
+                <option value="Magboard">Magboard</option>
+                <option value="NCC">NCC</option>
+                <option value="NSS Club">NSS Club</option>
+                <option value="Public and Relations Cell">Public and Relations Cell</option>
+                <option value="Radio Club">Radio Club</option>
+                <option value="Research and Development Club">Research and Development Club</option>
+                <option value="SAE Collegative Club">SAE Collegative Club</option>
+                <option value="Spiritual Club">Spiritual Club</option>
+                <option value="Sports Club">Sports Club</option>
+               <option value="Technical Board">Technical Board</option>
+              </select>
+            </div>
+            <div class="input-grp">
+              <label>FULL NAME</label>
+              <input type="text" id="reg-name" required />
+            </div>
+            <div class="input-grp">
+              <label>REGISTRATION NO</label>
+              <input type="text" id="reg-reg" required />
+            </div>
+            <div class="input-grp">
+              <label>EMAIL ADDRESS</label>
+              <input type="email" id="reg-email" required />
+            </div>
+            <div class="input-grp">
+              <label>PHONE NUMBER</label>
+              <input type="tel" id="reg-phone" placeholder="+91XXXXXXXXXX" required />
+            </div>
+            <div class="input-grp">
+              <label>SECRET PASSCODE</label>
+              <input type="password" id="reg-pass" required />
+            </div>
+            <button id="v7-reg-submit" type="submit" class="submit-btn" style="background: #a855f7;">REGISTER NOW</button>
+           </div>
+        </form>
+      </div>
+
+      <div class="new-club-fab" id="v7-new-club-fab" style="display:none;">
+        <button type="button" class="new-club-link" onclick="openV7NewClubModal()">+ New Club</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="v7-new-club-modal" class="modal">
+    <div class="modal-box">
+      <h3 class="modal-title">Create New Club</h3>
+      <div class="input-grp" style="margin-bottom: 10px;">
+        <label>CLUB NAME</label>
+        <input type="text" id="v7-new-club-name" placeholder="Enter club name" />
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="submit-btn" style="background:#334155;" onclick="closeV7NewClubModal()">Cancel</button>
+        <button type="button" class="submit-btn" style="background:#3b82f6;" onclick="createV7NewClub()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CUSTOM_CLUBS_KEY = 'customClubs';
+    const DELETED_BASE_CLUBS_KEY = 'deletedBaseClubs';
+    const SECRETARY_PURGE_KEY = 'secretariesDataPurge_v1';
+    const REGISTRATION_PIN = '250695';
+    const BASE_CLUBS = [
+      'COE: AI,Robotics', 'Competitive Programming', 'Cultural Board', 'Cycling Club',
+      'DDQ Club', 'EV Club', 'Film Club', 'GDSC Club', 'GDXR Club', 'ISDF Club',
+      'Magboard', 'NCC', 'NSS Club', 'OSS Club', 'Public and Relations Cell',
+      'Radio Club', 'Research and Development Club', 'SAE Collegative Club',
+      'Spiritual Club', 'Sports Club', 'Technical Board'
+    ];
+
+    function sanitizeLegacySecretaryDetails() {
+      if (!localStorage.getItem(SECRETARY_PURGE_KEY)) {
+        localStorage.removeItem('secretaries');
+        localStorage.removeItem('loggedSecretary');
+        localStorage.removeItem('lastActiveClub');
+        localStorage.setItem(SECRETARY_PURGE_KEY, '1');
+      }
+
+      Object.keys(localStorage).forEach((key) => {
+        if (!key.startsWith('clubInfo_')) return;
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return;
+
+        if (Object.prototype.hasOwnProperty.call(data, 'email') || Object.prototype.hasOwnProperty.call(data, 'phone')) {
+          delete data.email;
+          delete data.phone;
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+      });
+
+      const db = (JSON.parse(localStorage.getItem('secretaries')) || []).map((s) => ({
+        name: s.name,
+        regNo: s.regNo,
+        password: s.password,
+        club: s.club
+      }));
+      localStorage.setItem('secretaries', JSON.stringify(db));
+
+      const logged = JSON.parse(localStorage.getItem('loggedSecretary'));
+      if (logged) {
+        localStorage.setItem('loggedSecretary', JSON.stringify({ name: logged.name, regNo: logged.regNo, password: logged.password, club: logged.club }));
+      }
+    }
+
+    sanitizeLegacySecretaryDetails();
+
+    function getAllClubs() {
+      const deletedBase = JSON.parse(localStorage.getItem(DELETED_BASE_CLUBS_KEY)) || [];
+      const custom = JSON.parse(localStorage.getItem(CUSTOM_CLUBS_KEY)) || [];
+      const merged = BASE_CLUBS.filter((club) => !deletedBase.some((d) => String(d).toLowerCase() === String(club).toLowerCase()));
+      custom.forEach((club) => {
+        if (!club || typeof club !== 'string') return;
+        if (!merged.some((c) => c.toLowerCase() === club.toLowerCase())) merged.push(club);
+      });
+      return merged;
+    }
+
+    function populateV7ClubDropdown(selectedClub = '') {
+      const select = document.getElementById('reg-club');
+      if (!select) return;
+      const prev = selectedClub || select.value;
+      const clubs = getAllClubs();
+
+      select.innerHTML = '<option value="" disabled selected>-- Choose Club --</option>';
+      clubs.forEach((club) => {
+        const opt = document.createElement('option');
+        opt.value = club;
+        opt.textContent = club;
+        select.appendChild(opt);
+      });
+
+      if (prev && clubs.includes(prev)) select.value = prev;
+    }
+
+    function openV7NewClubModal() {
+      const modal = document.getElementById('v7-new-club-modal');
+      if (!modal) {
+        alert('Modal element not found. Please refresh the page.');
+        return;
+      }
+      const input = document.getElementById('v7-new-club-name');
+      if (!input) {
+        alert('Input element not found. Please refresh the page.');
+        return;
+      }
+      input.value = '';
+      modal.style.display = 'flex';
+      setTimeout(() => input.focus(), 100);
+    }
+
+    function closeV7NewClubModal() {
+      const modal = document.getElementById('v7-new-club-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function createV7NewClub() {
+      try {
+        const input = document.getElementById('v7-new-club-name');
+        if (!input) {
+          alert('Club name input not found. Please refresh and try again.');
+          return;
+        }
+
+        const clubName = input.value.trim();
+        if (!clubName || clubName.length === 0) {
+          alert('Please enter a club name.');
+          input.focus();
+          return;
+        }
+
+        if (clubName.length > 100) {
+          alert('Club name must be less than 100 characters.');
+          return;
+        }
+
+        const normalized = clubName.toLowerCase();
+        const safeName = clubName.replace(/[^a-zA-Z0-9]/g, '_');
+        const cKey = `clubInfo_${safeName}`;
+        let deletedBase = JSON.parse(localStorage.getItem(DELETED_BASE_CLUBS_KEY)) || [];
+        const isBaseClub = BASE_CLUBS.some((c) => String(c).toLowerCase() === normalized);
+        const isDeletedBaseClub = deletedBase.some((c) => String(c).toLowerCase() === normalized);
+
+        const hasClubInfo = !!localStorage.getItem(cKey);
+        const hasEvents = (JSON.parse(localStorage.getItem(`events_${safeName}`)) || []).length > 0;
+        const hasRegistrations = (JSON.parse(localStorage.getItem(`registrations_${safeName}`)) || []).length > 0;
+        const hasJoinApps = (JSON.parse(localStorage.getItem(`joinApplications_${safeName}`)) || []).length > 0;
+        const hasSecretaryForClub = (JSON.parse(localStorage.getItem('secretaries')) || [])
+          .some((u) => String(u.club || '').trim().toLowerCase() === normalized);
+        const canRestoreDeletedBase = isBaseClub && (isDeletedBaseClub || (!hasClubInfo && !hasEvents && !hasRegistrations && !hasJoinApps && !hasSecretaryForClub));
+
+        if (canRestoreDeletedBase) {
+          deletedBase = deletedBase.filter((c) => String(c).toLowerCase() !== normalized);
+          localStorage.setItem(DELETED_BASE_CLUBS_KEY, JSON.stringify(deletedBase));
+          localStorage.setItem(cKey, JSON.stringify({
+            club: clubName,
+            description: 'Newly formed club.',
+            allowJoin: false
+          }));
+          populateV7ClubDropdown(clubName);
+          closeV7NewClubModal();
+          alert('Club recreated successfully. It will now appear in the club list.');
+          return;
+        }
+
+        const customClubs = JSON.parse(localStorage.getItem(CUSTOM_CLUBS_KEY)) || [];
+        const all = getAllClubs().map((c) => String(c).toLowerCase());
+        if (all.includes(normalized)) {
+          alert('This club already exists.');
+          input.focus();
+          return;
+        }
+
+        customClubs.push(clubName);
+        localStorage.setItem(CUSTOM_CLUBS_KEY, JSON.stringify(customClubs));
+
+        localStorage.setItem(cKey, JSON.stringify({
+          club: clubName,
+          description: 'Newly formed club.',
+          allowJoin: false
+        }));
+
+        populateV7ClubDropdown(clubName);
+        closeV7NewClubModal();
+        alert('New club "' + clubName + '" created successfully. It will now appear in the club list.');
+      } catch (err) {
+        console.error('Error creating club:', err);
+        alert('An error occurred while creating the club. Please try again.');
+      }
+    }
+
+    function toggleAuth(mode) {
+      const loginForm = document.getElementById('v7-login-form');
+      const registerForm = document.getElementById('v7-register-form');
+      const newClubFab = document.getElementById('v7-new-club-fab');
+      if (!loginForm || !registerForm) return;
+
+      if (mode === 'log') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        if (newClubFab) newClubFab.style.display = 'none';
+        document.getElementById('tab-log').className = 'form-tab active';
+        document.getElementById('tab-reg').className = 'form-tab';
+      } else if (mode === 'reg') {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        if (newClubFab) newClubFab.style.display = 'block';
+        document.getElementById('tab-log').className = 'form-tab';
+        document.getElementById('tab-reg').className = 'form-tab active';
+        resetV7RegisterGate();
+        populateV7ClubDropdown();
+      }
+    }
+
+    function setV7RegisterUnlocked(unlocked) {
+      console.log('setV7RegisterUnlocked called with:', unlocked);
+      try {
+        const block = document.getElementById('v7-reg-details');
+        const codeBlock = document.getElementById('v7-reg-code-block');
+        const verifyBtn = document.getElementById('v7-verify-btn');
+        
+        if (!block) {
+          console.error('v7-reg-details not found');
+          return;
+        }
+        if (!codeBlock) {
+          console.error('v7-reg-code-block not found');
+          return;
+        }
+        if (!verifyBtn) {
+          console.error('v7-verify-btn not found');
+          return;
+        }
+        
+        codeBlock.style.display = unlocked ? 'none' : 'block';
+        verifyBtn.style.display = unlocked ? 'none' : 'block';
+        block.style.display = unlocked ? 'block' : 'none';
+        block.querySelectorAll('input, select, textarea, button').forEach((el) => {
+          el.disabled = !unlocked;
+        });
+        console.log('setV7RegisterUnlocked completed');
+      } catch (err) {
+        console.error('Error in setV7RegisterUnlocked:', err);
+      }
+    }
+
+    function resetV7RegisterGate() {
+      console.log('resetV7RegisterGate called');
+      try {
+        const codeInput = document.getElementById('reg-access-code');
+        if (codeInput) {
+          codeInput.value = '';
+        }
+        setV7RegisterUnlocked(false);
+      } catch (err) {
+        console.error('Error in resetV7RegisterGate:', err);
+      }
+    }
+
+    function verifyV7Code() {
+      try {
+        const codeInput = document.getElementById('reg-access-code');
+        if (!codeInput) {
+          alert('Code input not found. Please refresh the page.');
+          return;
+        }
+
+        const code = codeInput.value.trim();
+        if (!code) {
+          alert('Please enter an access code.');
+          codeInput.focus();
+          return;
+        }
+
+        if (code !== REGISTRATION_PIN) {
+          alert('Invalid registration access code. Please try again.');
+          codeInput.value = '';
+          codeInput.focus();
+          return;
+        }
+
+        setV7RegisterUnlocked(true);
+        const clubSelect = document.getElementById('reg-club');
+        if (clubSelect) clubSelect.focus();
+      } catch (err) {
+        console.error('Verification error:', err);
+        alert('An error occurred during verification. Please try again.');
+      }
+    }
+
+    document.getElementById('v7-login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const n = document.getElementById('log-name').value.trim();
+      const r = document.getElementById('log-regNo').value.trim();
+      const p = document.getElementById('log-pass').value;
+      let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+      db = db.map((s) => ({ name: s.name, regNo: s.regNo, password: s.password, club: s.club }));
+      localStorage.setItem('secretaries', JSON.stringify(db));
+      const u = db.find(s => s.name.toLowerCase() === n.toLowerCase() && s.regNo === r && s.password === p);
+      if (u) {
+        localStorage.setItem('loggedSecretary', JSON.stringify(u));
+        localStorage.setItem('lastActiveClub', u.club);
+        window.location.href = 'dashboard-v5.html';
+      } else {
+        document.getElementById('log-error').style.display = 'block';
+        document.getElementById('log-error').textContent = 'Invalid credentials. Check name, registration number, or password.';
+      }
+    });
+
+    document.getElementById('v7-register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      try {
+        const accessCode = document.getElementById('reg-access-code').value.trim();
+        if (accessCode !== REGISTRATION_PIN) {
+          alert('Invalid registration access code.');
+          return;
+        }
+
+        const c = document.getElementById('reg-club').value;
+        const n = document.getElementById('reg-name').value.trim();
+        const r = document.getElementById('reg-reg').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const p = document.getElementById('reg-pass').value;
+
+        if (!c || !n || !r || !email || !phone || !p) {
+          alert('Please fill all required fields.');
+          return;
+        }
+
+        let db = JSON.parse(localStorage.getItem('secretaries')) || [];
+        if (db.find(s => s.regNo === r)) {
+          alert('Registration number already exists.');
+          return;
+        }
+
+        db.push({ name:n, regNo:r, password:p, club:c });
+        localStorage.setItem('secretaries', JSON.stringify(db));
+
+        const safeName = c.replace(/[^a-zA-Z0-9]/g, '_');
+        const cKey = `clubInfo_${safeName}`;
+        const existingClubInfo = JSON.parse(localStorage.getItem(cKey)) || {};
+        localStorage.setItem(cKey, JSON.stringify({
+          ...existingClubInfo,
+          club: c
+        }));
+
+        localStorage.setItem('loggedSecretary', JSON.stringify({ name:n, regNo:r, club:c }));
+        localStorage.setItem('lastActiveClub', c);
+        alert('Registration successful. Redirecting...');
+        window.location.href = 'dashboard-v5.html';
+      } catch (err) {
+        console.error('Registration error:', err);
+        alert('An error occurred during registration. Please try again.');
+      }
+    });
+
+    document.getElementById('v7-new-club-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'v7-new-club-modal') closeV7NewClubModal();
+    });
+
+    populateV7ClubDropdown();
+  </script>
+</body>
+</html>

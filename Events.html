@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <title>Club Events | Eventify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#a855f7; --bg-darker:#020617; --bg-card:#1e293b; --text-dim:#94a3b8; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif; }
+    body { background: var(--bg-darker); color: white; min-height: 100vh; }
+    .nav { padding: 20px 50px; background: rgba(15,23,42,0.9); border-bottom: 1px solid #334155; display:flex; justify-content:space-between; align-items:center; }
+    .nav h1 { font-size: 22px; font-weight: 900; color: var(--primary); text-decoration: none; }
+    .sync-banner { background: #f59e0b; color: black; text-align: center; padding: 10px; font-weight: 800; font-size: 13px; }
+    .content { max-width: 1000px; margin: 60px auto; padding: 0 20px; }
+    .club-header { text-align: center; margin-bottom: 60px; }
+    .club-header h2 { font-size: 3.5rem; margin-bottom: 10px; }
+    .club-desc { color: var(--text-dim); line-height: 1.6; max-width: 700px; margin: 0 auto; }
+    .event-section { background: var(--bg-card); border-radius: 20px; padding: 30px; margin-bottom: 30px; border-left: 6px solid var(--primary); }
+    .event-list { list-style: none; margin-top: 20px; }
+    .event-item { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .event-item:last-child { border: none; }
+    .status-badge { font-size: 0.7rem; font-weight: 900; background: #3b82f6; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; margin-left: 10px; }
+    .btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 14px; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 10000; }
+    .modal-content { background: #1e293b; padding: 40px; border-radius: 24px; width: 100%; max-width: 450px; }
+    input { width: 100%; padding: 12px; margin: 10px 0; background: rgba(0,0,0,0.3); border: 1px solid #334155; border-radius: 8px; color: white; }
+  </style>
+</head>
+<body>
+
+  <div id="sync-check" class="sync-banner">⚡ SYNC ACTIVE: REFRESH PAGE (CTRL+F5) IF UPDATES DON'T APPEAR ⚡</div>
+
+  <nav class="nav">
+    <a href="index.html" style="text-decoration:none;"><h1>Eventify</h1></a>
+    <div style="display:flex; gap:20px;">
+      <a href="clubs-v5.html" style="color:white; text-decoration:none; font-weight:700;">Back to Clubs</a>
+      <a href="portal-unified.html" class="btn">Secretary Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="content">
+    <div class="club-header">
+      <h2 id="club-title">Loading Club...</h2>
+      <p id="club-desc" class="club-desc">Fetching institutional data...</p>
+    </div>
+
+    <div class="event-section" style="border-color:#a855f7;">
+      <h3>Total Events <span id="count-total" style="opacity:0.6; font-size:1rem;">(0)</span></h3>
+      <div id="total-list" class="event-list"></div>
+    </div>
+
+    <div class="event-section" style="border-color:#3b82f6;">
+      <h3>Ongoing Events</h3>
+      <div id="ongoing-list" class="event-list"></div>
+    </div>
+
+    <div class="event-section" style="border-color:#f59e0b;">
+      <h3>Upcoming Events</h3>
+      <div id="upcoming-list" class="event-list"></div>
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div id="reg-modal" class="modal">
+    <div class="modal-content">
+      <h2 id="m-title">Register</h2>
+      <p id="m-name" style="margin-bottom:20px; color:var(--text-dim);"></p>
+      <form id="reg-form">
+        <input type="text" id="team-name" placeholder="Team Name" required>
+        <input type="text" id="s-name" placeholder="Student Name" required>
+        <input type="text" id="s-reg" placeholder="Roll Number" required>
+        <input type="email" id="s-mail" placeholder="Email" required>
+        <button type="submit" class="btn" style="width:100%; margin-top:20px;">Complete Registration</button>
+      </form>
+      <button onclick="closeModal()" style="width:100%; margin-top:10px; background:none; border:none; color:var(--text-dim); cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    let clubName = urlParams.get('club');
+
+    // AUTO-RECOVERY: If URL parameter is missing, try retrieving from known session data
+    if (!clubName) {
+      clubName = localStorage.getItem('lastActiveClub');
+      if (!clubName) {
+        const loggedSecretary = JSON.parse(localStorage.getItem('loggedSecretary') || 'null');
+        if (loggedSecretary && loggedSecretary.club) {
+          clubName = loggedSecretary.club;
+          localStorage.setItem('lastActiveClub', clubName);
+        }
+      }
+      if (clubName) {
+        console.log("Auto-recovered club:", clubName);
+        window.history.replaceState(null, '', `?club=${encodeURIComponent(clubName)}`);
+      } else {
+        clubName = "Unknown Club";
+      }
+    } else {
+      localStorage.setItem('lastActiveClub', clubName);
+    }
+
+    const safeName = clubName.replace(/[^a-zA-Z0-9]/g, '_');
+    const regStorageKey = `registrations_${safeName}`;
+    let selectedEvent = null;
+    
+    // MIGRATION SUPPORT: Check both underscored keys and legacy space-keys
+    let events = JSON.parse(localStorage.getItem(`events_${safeName}`)) 
+               || JSON.parse(localStorage.getItem(`events_${clubName}`)) 
+               || [];
+    
+    let info = JSON.parse(localStorage.getItem(`clubInfo_${safeName}`)) 
+            || JSON.parse(localStorage.getItem(`clubInfo_${clubName}`)) 
+            || {};
+
+    document.getElementById('club-title').textContent = clubName;
+    if (info.description) document.getElementById('club-desc').textContent = info.description;
+    document.getElementById('count-total').textContent = `(${events.length})`;
+
+    function render() {
+      const lists = {
+        total: document.getElementById('total-list'),
+        ongoing: document.getElementById('ongoing-list'),
+        upcoming: document.getElementById('upcoming-list')
+      };
+
+      if (events.length === 0) {
+        lists.total.innerHTML = '<p style="color:var(--text-dim)">No events found for this club yet.</p>';
+      }
+
+      events.forEach(e => {
+        const item = `<div class="event-item">
+          <strong>${e.name}</strong> <span class="status-badge">${e.status}</span><br>
+          <small style="color:var(--text-dim)">📅 ${e.date}</small>
+          <small style="color:var(--text-dim); display:block; margin-top:4px;">🕒 ${e.time || '-'}</small>
+          <small style="color:var(--text-dim); display:block; margin-top:4px;">📍 ${e.place || '-'}</small>
+          <p style="margin-top:10px; font-size:0.9rem;">${e.desc}</p>
+          ${e.status !== 'past' ? `<button onclick="openModal(${e.id}, '${e.name.replace(/'/g, "\\'")}')" style="margin-top:10px; border:none; color:var(--primary); background:none; font-weight:800; cursor:pointer;">Register →</button>` : ''}
+        </div>`;
+        lists.total.innerHTML += item;
+        if (lists[e.status]) lists[e.status].innerHTML += item;
+      });
+
+      ['ongoing', 'upcoming'].forEach(cat => {
+        if (!lists[cat].innerHTML) lists[cat].innerHTML = '<p style="color:var(--text-dim)">No current events in this category.</p>';
+      });
+    }
+
+    function openModal(eventId, name) {
+      selectedEvent = { id: eventId, name };
+      document.getElementById('m-name').textContent = "Event: " + name;
+      document.getElementById('reg-modal').style.display = 'flex';
+    }
+    function closeModal() {
+      selectedEvent = null;
+      document.getElementById('reg-modal').style.display = 'none';
+    }
+    
+    document.getElementById('reg-form').onsubmit = (e) => {
+      e.preventDefault();
+      if (!selectedEvent) {
+        alert('Event selection missing. Please try again.');
+        return;
+      }
+
+      const teamName = document.getElementById('team-name').value.trim();
+      const studentName = document.getElementById('s-name').value.trim();
+      const regNo = document.getElementById('s-reg').value.trim();
+      const email = document.getElementById('s-mail').value.trim();
+
+      let registrations = JSON.parse(localStorage.getItem(regStorageKey)) || [];
+      const alreadyRegistered = registrations.find(r => r.eventId === selectedEvent.id && r.regNo.toLowerCase() === regNo.toLowerCase());
+      if (alreadyRegistered) {
+        alert('This roll number is already registered for this event.');
+        return;
+      }
+
+      registrations.push({
+        id: Date.now(),
+        club: clubName,
+        eventId: selectedEvent.id,
+        eventName: selectedEvent.name,
+        teamName,
+        studentName,
+        regNo,
+        email,
+        registeredAt: new Date().toISOString()
+      });
+      localStorage.setItem(regStorageKey, JSON.stringify(registrations));
+
+      alert('Registration submitted successfully.');
+      document.getElementById('reg-form').reset();
+      closeModal();
+    };
+
+    render();
+  </script>
+</body>
+</html>

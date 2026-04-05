@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eventify | Army Institute of Technology</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #9333ea;
+      --secondary: #6366f1;
+      --accent: #10b981;
+      --bg-dark: #0f172a;
+      --bg-darker: #020617;
+      --text-light: #f8fafc;
+      --text-dim: #94a3b8;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-darker);
+      color: var(--text-light);
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* ===== MODERN NAVBAR ===== */
+    .navbar {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 15px 50px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-dim);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--text-light);
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+
+    .notif-wrap {
+      position: relative;
+      margin-left: 8px;
+    }
+
+    .notif-btn {
+      border: 1px solid rgba(147, 51, 234, 0.45);
+      background: rgba(147, 51, 234, 0.12);
+      color: #e2e8f0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notif-btn:hover {
+      background: rgba(147, 51, 234, 0.2);
+      border-color: rgba(147, 51, 234, 0.8);
+    }
+
+    .notif-badge {
+      min-width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 6px;
+      font-weight: 800;
+    }
+
+    .notif-panel {
+      position: absolute;
+      right: 0;
+      top: 44px;
+      width: min(92vw, 420px);
+      background: #111827;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 14px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      display: none;
+      overflow: hidden;
+      z-index: 1200;
+    }
+
+    .notif-panel.open { display: block; }
+    .notif-panel-head {
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      background: rgba(99, 102, 241, 0.14);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .notif-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .notif-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+      line-height: 1.4;
+      font-size: 0.88rem;
+    }
+
+    .notif-link {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .notif-link:hover {
+      background: rgba(99, 102, 241, 0.12);
+    }
+
+    .notif-item:last-child { border-bottom: none; }
+    .notif-meta { color: #94a3b8; font-size: 0.78rem; margin-top: 4px; }
+
+    .notif-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .notif-modal-box {
+      width: min(92vw, 560px);
+      background: #111827;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    }
+
+    .notif-modal-box h3 { margin: 0 0 10px; }
+    .notif-modal-box p { margin: 6px 0; color: #cbd5e1; }
+    .notif-modal-box ul { margin: 8px 0 10px 20px; color: #cbd5e1; }
+
+    .login-fab {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1.6rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 1300;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .login-fab:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 18px 34px rgba(99, 102, 241, 0.55);
+    }
+
+    /* ===== HERO SECTION ===== */
+    .hero-section {
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 0 20px;
+      position: relative;
+      background: radial-gradient(circle at 50% 50%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+    }
+
+    .hero-badge {
+      background: rgba(147, 51, 234, 0.1);
+      border: 1px solid rgba(147, 51, 234, 0.3);
+      padding: 8px 16px;
+      border-radius: 30px;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hero-section h2 {
+      font-size: 4.5rem;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .hero-section h2 span {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      max-width: 650px;
+      color: var(--text-dim);
+      font-size: 1.25rem;
+      line-height: 1.6;
+      margin: 30px 0;
+      animation: fadeInUp 1.2s ease-out;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 20px;
+      animation: fadeInUp 1.4s ease-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 10px 20px rgba(147, 51, 234, 0.3);
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(147, 51, 234, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      max-width: 1000px;
+      margin: -50px auto 100px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .stat-card:hover { transform: translateY(-5px); }
+
+    .stat-card h4 { font-size: 2rem; margin: 0; color: white; }
+    .stat-card p { font-size: 0.9rem; color: var(--text-dim); margin: 5px 0 0; }
+
+    /* ===== FEATURES ===== */
+    .features-section {
+      padding: 100px 50px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .feature-card {
+      padding: 40px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      transform: scale(1.02);
+    }
+
+    .feature-icon {
+      width: 50px; height: 50px;
+      background: rgba(147, 51, 234, 0.1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 { margin: 0 0 15px; font-size: 1.4rem; }
+    .feature-card p { color: var(--text-dim); line-height: 1.6; }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-section h2 { font-size: 3rem; }
+      .stats-container { grid-template-columns: 1fr 1fr; margin: 0 20px 50px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .navbar { padding: 15px 20px; }
+      .login-fab {
+        right: 16px;
+        bottom: 16px;
+        width: 58px;
+        height: 58px;
+        font-size: 1.4rem;
+      }
+    }
+
+    footer {
+      padding: 50px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>Eventify</h1>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="clubs.html">Clubs</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li class="notif-wrap">
+        <button id="home-notif-btn" class="notif-btn" type="button">
+          Notifications
+          <span id="home-notif-count" class="notif-badge">0</span>
+        </button>
+        <div id="home-notif-panel" class="notif-panel">
+          <div class="notif-panel-head">Live Updates (24h)</div>
+          <div id="home-notif-list" class="notif-list"></div>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <section class="hero-section">
+    <div class="hero-badge">OFFICIAL EVENT PORTAL</div>
+    <h2>Everything happens <span>Organised.</span></h2>
+    <p>
+      Centralized, easy clubs and event management platform for the 
+      <strong>Army Institute of Technology, Pune</strong>. Stay updated with live events and registrations.
+    </p>
+    <div class="hero-btns">
+      <a href="clubs.html" class="btn-primary">Explore Clubs</a>
+    </div>
+  </section>
+
+  <div id="notif-detail-modal" class="notif-modal">
+    <div class="notif-modal-box">
+      <h3 id="notif-detail-title">Notification</h3>
+      <div id="notif-detail-body"></div>
+      <button id="notif-detail-close" class="btn-primary" style="border:none; margin-top:10px; cursor:pointer;">Close</button>
+    </div>
+  </div>
+
+  <div class="stats-container">
+    <div class="stat-card">
+      <h4 id="count-clubs">20+</h4>
+      <p>Active Clubs</p>
+    </div>
+    <div class="stat-card">
+      <h4 id="count-events">150+</h4>
+      <p>Events Annually</p>
+    </div>
+    <div class="stat-card">
+      <h4 id="count-students">1200+</h4>
+      <p>Active Students</p>
+    </div>
+  </div>
+
+  <section class="features-section">
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Live Tracking</h3>
+        <p>Monitor ongoing and upcoming club events in real-time. Never miss an orientation or competition again.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Easy Registration</h3>
+        <p>Register for any event with just a few clicks. Isolated data management keeps your entries secure.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Dynamic Dashboard</h3>
+        <p>Club secretaries can manage their presence, update descriptions, and track registrations seamlessly.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Army Institute of Technology, Pune | Built with ❤️ by Eventify Team</p>
+  </footer>
+
+  <a href="portal-unified.html" class="login-fab" aria-label="Login" title="Login">👤</a>
+
+  <script>
+    const HOME_NOTIFICATION_KEY = 'home_ongoing_notifications';
+    const CLUB_MEET_NOTIFICATION_KEY = 'club_meet_notifications';
+    const INTERVIEW_NOTIFICATION_KEY = 'interview_notifications';
+    const NOTIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+    const $ = (id) => document.getElementById(id);
+
+    const notifBtn = $('home-notif-btn');
+    const notifPanel = $('home-notif-panel');
+    const notifCount = $('home-notif-count');
+    const notifList = $('home-notif-list');
+    const notifWrap = document.querySelector('.notif-wrap');
+    const notifDetailModal = $('notif-detail-modal');
+    const notifDetailTitle = $('notif-detail-title');
+    const notifDetailBody = $('notif-detail-body');
+    let currentNotifications = [];
+
+    const getActiveHomeNotifications = () => {
+      const now = Date.now();
+      const active = (JSON.parse(localStorage.getItem(HOME_NOTIFICATION_KEY)) || [])
+        .filter((x) => x && x.createdAt && now - x.createdAt <= NOTIFICATION_TTL_MS)
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 5);
+      localStorage.setItem(HOME_NOTIFICATION_KEY, JSON.stringify(active));
+      return active;
+    };
+
+    const getActiveClubMeetNotifications = () => {
+      const now = Date.now();
+      const active = (JSON.parse(localStorage.getItem(CLUB_MEET_NOTIFICATION_KEY)) || [])
+        .filter((x) => x && x.createdAt && now - x.createdAt <= NOTIFICATION_TTL_MS)
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 5)
+        .map((x) => ({ ...x, type: 'club-meet' }));
+      localStorage.setItem(CLUB_MEET_NOTIFICATION_KEY, JSON.stringify(active));
+      return active;
+    };
+
+    const getInterviewNotificationsByClub = () => {
+      const now = Date.now();
+      const raw = (JSON.parse(localStorage.getItem(INTERVIEW_NOTIFICATION_KEY)) || [])
+        .filter((x) => x && x.createdAt && now - x.createdAt <= NOTIFICATION_TTL_MS)
+        .sort((a, b) => b.createdAt - a.createdAt);
+      localStorage.setItem(INTERVIEW_NOTIFICATION_KEY, JSON.stringify(raw));
+      if (!raw.length) return [];
+
+      const clubMap = {};
+      const seen = new Set();
+      raw.forEach((n) => {
+        const clubName = n.club || 'Unknown Club';
+        if (!clubMap[clubName]) {
+          clubMap[clubName] = {
+            club: clubName,
+            candidates: [],
+            interviewTime: n.interviewTime || '-',
+            interviewPlace: n.interviewPlace || '-',
+            createdAt: n.createdAt || 0
+          };
+        }
+        const list = (n.candidates && n.candidates.length) ? n.candidates : [{ name: n.name, regNo: n.regNo }];
+        list.forEach((c) => {
+          const key = `${clubName.toLowerCase()}|${(c.name || '').trim().toLowerCase()}|${(c.regNo || '').trim().toLowerCase()}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            clubMap[clubName].candidates.push({ name: c.name, regNo: c.regNo });
+          }
+        });
+      });
+
+      return Object.values(clubMap)
+        .map((item) => ({
+          type: 'interview-club',
+          club: `${item.club} Interview`,
+          sourceClub: item.club,
+          candidates: item.candidates,
+          interviewTime: item.interviewTime,
+          interviewPlace: item.interviewPlace,
+          createdAt: item.createdAt
+        }))
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    };
+
+    const renderHomeNotifications = () => {
+      const ongoing = getActiveHomeNotifications().map((n) => ({ ...n, type: 'ongoing' }));
+      const clubMeets = getActiveClubMeetNotifications();
+      const interviewByClub = getInterviewNotificationsByClub();
+      const all = [...ongoing, ...clubMeets, ...interviewByClub]
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+        .slice(0, 10);
+      currentNotifications = all;
+
+      notifCount.textContent = String(all.length);
+      notifList.innerHTML = all.length
+        ? all.map((n, idx) => {
+            if (n.type === 'interview-club') {
+              const count = (n.candidates && n.candidates.length) ? n.candidates.length : 0;
+              return `<button class="notif-link" type="button" onclick="openNotificationDetail(${idx})"><div class="notif-item"><strong>${n.club}</strong><div class="notif-meta">Candidates: ${count}</div></div></button>`;
+            }
+            if (n.type === 'club-meet') {
+              return `<button class="notif-link" type="button" onclick="openNotificationDetail(${idx})"><div class="notif-item"><strong>${n.club} Meet</strong><div class="notif-meta">${n.time ? n.time : '-'} | ${n.place || '-'}</div></div></button>`;
+            }
+            return `<button class="notif-link" type="button" onclick="openNotificationDetail(${idx})"><div class="notif-item"><strong>${n.club}</strong><div class="notif-meta">${n.title} | ${n.date} ${n.time ? '| ' + n.time : ''}</div></div></button>`;
+          }).join('')
+        : '<div class="notif-item">No notifications available.</div>';
+    };
+
+    window.openNotificationDetail = (idx) => {
+      const n = currentNotifications[idx];
+      if (!n) return;
+
+      notifDetailTitle.textContent = n.club || 'Notification';
+      if (n.type === 'interview-club') {
+        const candidates = n.candidates || [];
+        notifDetailBody.innerHTML = `
+          <p><strong>Interview Schedule</strong></p>
+          <p><strong>Club:</strong> ${n.sourceClub || '-'}</p>
+          <p><strong>Time:</strong> ${n.interviewTime || '-'}</p>
+          <p><strong>Place:</strong> ${n.interviewPlace || '-'}</p>
+          <p><strong>Candidates:</strong></p>
+          <ul>${candidates.map(c => `<li>${c.name || '-'} (${c.regNo || '-'})</li>`).join('') || '<li>No candidates found.</li>'}</ul>
+        `;
+      } else if (n.type === 'club-meet') {
+        notifDetailBody.innerHTML = `
+          <p><strong>Club Meet Call</strong></p>
+          <p><strong>Club:</strong> ${n.club || '-'}</p>
+          <p><strong>Time:</strong> ${n.time || '-'}</p>
+          <p><strong>Place:</strong> ${n.place || '-'}</p>
+          <p><strong>Message:</strong> ${n.desc || '-'}</p>
+        `;
+      } else {
+        notifDetailBody.innerHTML = `
+          <p><strong>Event:</strong> ${n.title || '-'}</p>
+          <p><strong>Date:</strong> ${n.date || '-'}</p>
+          <p><strong>Time:</strong> ${n.time || '-'}</p>
+          <p><strong>Place:</strong> ${n.place || '-'}</p>
+          <p><strong>Details:</strong> ${n.desc || '-'}</p>
+        `;
+      }
+
+      notifPanel.classList.remove('open');
+      notifDetailModal.style.display = 'flex';
+    };
+
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifPanel.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (notifPanel.classList.contains('open') && !notifWrap.contains(e.target)) notifPanel.classList.remove('open');
+    });
+
+    $('notif-detail-close').addEventListener('click', () => {
+      notifDetailModal.style.display = 'none';
+    });
+
+    notifDetailModal.addEventListener('click', (e) => {
+      if (e.target === notifDetailModal) notifDetailModal.style.display = 'none';
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === HOME_NOTIFICATION_KEY || e.key === CLUB_MEET_NOTIFICATION_KEY || e.key === INTERVIEW_NOTIFICATION_KEY) renderHomeNotifications();
+    });
+
+    renderHomeNotifications();
+    setInterval(renderHomeNotifications, 60000);
+  </script>
+
+</body>
+</html>

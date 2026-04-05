@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSS Club Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <nav class="navbar">
+        <h1>Eventify</h1>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="clubs.html" class="active">Clubs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="login.html">Login</a></li>
+        </ul>
+    </nav>
+</header>
+
+<!-- ================= OSS CLUB ================= -->
+
+<h2>OSS Club</h2>
+
+<!-- TOTAL EVENTS -->
+<h3>Our Total Events</h3>
+<ul class="event-list" id="total-events-list">
+  <!-- Events injected by JS -->
+</ul>
+
+<!-- ONGOING EVENTS -->
+<h3>Ongoing Events</h3>
+<ul class="event-list" id="ongoing-events-list">
+  <!-- Events injected by JS -->
+</ul>
+
+<!-- UPCOMING EVENTS -->
+<h3>Upcoming Events</h3>
+<ul class="event-list" id="upcoming-events-list">
+  <!-- Events injected by JS -->
+</ul>
+
+<!-- REGISTRATION MODAL -->
+<div id="registration-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeRegModal()">&times;</span>
+    <h2 id="reg-modal-title">Register for Event</h2>
+    <p class="login-subtitle" id="reg-event-name" style="margin-bottom: 20px; color:#cbd5f5; font-weight:bold;"></p>
+    
+    <div id="reg-student-error" class="error-msg" style="display: none;"></div>
+    
+    <form id="student-registration-form">
+      <input type="hidden" id="reg-event-id" />
+      <input type="hidden" id="reg-event-title-hidden" />
+      
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="student-name" required />
+      </div>
+      <div class="form-group">
+        <label>Registration/Roll Number</label>
+        <input type="text" id="student-reg-number" required />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="student-email" required />
+      </div>
+      
+      <button type="submit" class="submit-btn login-btn" id="student-reg-btn">Complete Registration</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Ensure some default event data exists for presentation if empty
+  const storageKey = 'events_OSS_Club';
+  let events = JSON.parse(localStorage.getItem(storageKey));
+  
+  // Registration Storage Key
+  const regStorageKey = 'registrations_OSS_Club';
+  
+  if (!events) {
+    events = [
+      { id: 1, name: 'Spark', date: '2025-02-01', status: 'past', desc: 'A one-month web development program for first-year students with hands-on training and mentorship.' },
+      { id: 2, name: 'SIH (Smart India Hackathon)', date: '2025-03-05', status: 'past', desc: 'A national-level innovation competition where students develop solutions for real-world problems.' },
+      { id: 3, name: 'De-Verse', date: '2025-06-10', status: 'ongoing', desc: 'A 7-day development program designed for SE and TE students to enhance practical coding.' },
+      { id: 4, name: 'Innerve Hackathon', date: '2025-08-15', status: 'upcoming', desc: 'A large inter-college hackathon where participants present ideas and build working prototypes.' }
+    ];
+    localStorage.setItem(storageKey, JSON.stringify(events));
+  }
+
+  function renderEvents() {
+    const totalList = document.getElementById('total-events-list');
+    const ongoingList = document.getElementById('ongoing-events-list');
+    const upcomingList = document.getElementById('upcoming-events-list');
+    
+    totalList.innerHTML = '';
+    ongoingList.innerHTML = '';
+    upcomingList.innerHTML = '';
+
+    // Render Total
+    events.forEach(e => {
+      totalList.innerHTML += `<li><strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}</li>`;
+    });
+    
+    if (events.length === 0) totalList.innerHTML = '<li style="border-left-color:gray; color:#cbd5f5;">No events found.</li>';
+
+    // Render Ongoing
+    const ongoing = events.filter(e => e.status === 'ongoing');
+    ongoing.forEach(e => {
+      ongoingList.innerHTML += `
+        <li style="border-left-color:#3b82f6; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px; padding-right:15px;">
+            <strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}
+          </div>
+          <button class="register-btn" onclick="openRegModal(${e.id}, '${e.name.replace(/'/g, "\\'")}')">Register Now</button>
+        </li>`;
+    });
+    
+    if (ongoing.length === 0) ongoingList.innerHTML = '<li style="border-left-color:gray; color:#cbd5f5;">No ongoing events at the moment.</li>';
+
+    // Render Upcoming
+    const upcoming = events.filter(e => e.status === 'upcoming');
+    upcoming.forEach(e => {
+      upcomingList.innerHTML += `
+        <li style="border-left-color:#f59e0b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px; padding-right:15px;">
+            <strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}
+          </div>
+          <button class="register-btn" onclick="openRegModal(${e.id}, '${e.name.replace(/'/g, "\\'")}')">Register Now</button>
+        </li>`;
+    });
+
+    if (upcoming.length === 0) upcomingList.innerHTML = '<li style="border-left-color:gray; color:#cbd5f5;">No upcoming events scheduled.</li>';
+  }
+
+  // Handle Modal
+  function openRegModal(eventId, eventName) {
+    document.getElementById('reg-event-id').value = eventId;
+    document.getElementById('reg-event-title-hidden').value = eventName;
+    document.getElementById('reg-event-name').textContent = `Event: ${eventName}`;
+    document.getElementById('student-registration-form').reset();
+    document.getElementById('reg-student-error').style.display = 'none';
+    document.getElementById('student-reg-btn').textContent = 'Complete Registration';
+    document.getElementById('student-reg-btn').style.background = 'linear-gradient(135deg, #9333ea, #a855f7)';
+    document.getElementById('registration-modal').style.display = 'flex';
+  }
+
+  function closeRegModal() {
+    document.getElementById('registration-modal').style.display = 'none';
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('registration-modal');
+    if (event.target == modal) {
+      closeRegModal();
+    }
+  }
+
+  // Handle Registration Submit
+  document.getElementById('student-registration-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const eventId = document.getElementById('reg-event-id').value;
+    const eventName = document.getElementById('reg-event-title-hidden').value;
+    const studentName = document.getElementById('student-name').value.trim();
+    const studentRegNumber = document.getElementById('student-reg-number').value.trim();
+    const studentEmail = document.getElementById('student-email').value.trim();
+    const btn = document.getElementById('student-reg-btn');
+    const errorDiv = document.getElementById('reg-student-error');
+
+    let registrations = JSON.parse(localStorage.getItem(regStorageKey)) || [];
+
+    // Check if student already registered for this specific event
+    const alreadyRegistered = registrations.find(r => r.eventId == eventId && r.regNumber === studentRegNumber);
+    if (alreadyRegistered) {
+      errorDiv.textContent = 'You are already registered for this event!';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    btn.textContent = 'Processing...';
+    btn.style.opacity = '0.7';
+
+    setTimeout(() => {
+      const newRegistration = {
+        id: Date.now(),
+        eventId: eventId,
+        eventName: eventName,
+        studentName: studentName,
+        regNumber: studentRegNumber,
+        email: studentEmail,
+        timestamp: new Date().toISOString()
+      };
+
+      registrations.push(newRegistration);
+      localStorage.setItem(regStorageKey, JSON.stringify(registrations));
+
+      btn.textContent = 'Registered Successfully!';
+      btn.style.background = '#10b981';
+      btn.style.opacity = '1';
+
+      setTimeout(() => {
+        closeRegModal();
+        alert(`Success! You have been registered for ${eventName}.`);
+      }, 800);
+
+    }, 600);
+  });
+
+  // Initial Render
+  renderEvents();
+</script>
+
+</body>
+</html>

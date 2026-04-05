@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIT Pune | Contact Us</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+
+    /* ===== HERO ===== */
+    .contact-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      padding: 80px 20px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-hero::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(147,51,234,0.15) 0%, transparent 70%);
+      top: -100px; left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .contact-hero h1 {
+      font-size: 3rem; font-weight: 700;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .contact-hero p {
+      color: #94a3b8; font-size: 1.1rem; max-width: 520px; margin: 0 auto;
+    }
+
+    /* ===== SECRETARIES GRID ===== */
+    .secretaries-section {
+      padding: 60px 40px;
+      background: #0a0f1e;
+    }
+    .section-heading {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 8px;
+    }
+    .section-subheading {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 40px;
+      font-size: 0.95rem;
+    }
+    .secretaries-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .secretary-card {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(168,85,247,0.15);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+    .secretary-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(168,85,247,0.5);
+      box-shadow: 0 12px 30px rgba(147,51,234,0.2);
+    }
+    .secretary-avatar {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #9333ea, #6366f1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 1.5rem; font-weight: 700; color: white;
+    }
+    .secretary-card h3 {
+      font-size: 1rem; font-weight: 700; color: #f8fafc; margin: 0 0 4px;
+    }
+    .secretary-card .club-tag {
+      font-size: 0.75rem; color: #a855f7; font-weight: 600;
+      background: rgba(168,85,247,0.1);
+      padding: 2px 10px; border-radius: 20px; display: inline-block; margin-bottom: 12px;
+    }
+    .secretary-card .contact-info {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .secretary-card .contact-info a {
+      color:#94a3b8; font-size: 0.82rem; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .secretary-card .contact-info a:hover { color: #a855f7; }
+    .secretary-card .contact-info span { font-size: 0.75rem; color: #64748b; }
+    .empty-secretaries {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 20px;
+      border: 1px dashed #334155;
+      border-radius: 12px;
+      color: #94a3b8;
+    }
+
+    /* ===== CONTACT FORM + INFO ROW ===== */
+    .contact-main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+    @media (max-width: 768px) {
+      .contact-main { grid-template-columns: 1fr; padding: 40px 20px; }
+      .contact-hero h1 { font-size: 2rem; }
+    }
+    .contact-info-panel h2 {
+      font-size: 1.6rem; font-weight: 700; color: #f8fafc; margin-bottom: 12px;
+    }
+    .contact-info-panel p { color: #94a3b8; margin-bottom: 28px; line-height: 1.7; }
+    .info-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .info-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(147,51,234,0.2), rgba(99,102,241,0.2));
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .info-item-text strong { display: block; color: #f8fafc; font-size: 0.9rem; margin-bottom: 2px; }
+    .info-item-text span { color: #94a3b8; font-size: 0.85rem; }
+
+    /* ===== FORM ===== */
+    .contact-form-panel form {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid rgba(168,85,247,0.15);
+      border-radius: 20px;
+      padding: 36px;
+    }
+    .contact-form-panel h2 {
+      font-size: 1.4rem; color: #f8fafc; margin-bottom: 20px; font-weight: 700;
+    }
+    .contact-form-panel .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .contact-form-panel .form-field {
+      display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;
+    }
+    .contact-form-panel label {
+      font-size: 0.8rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .contact-form-panel input,
+    .contact-form-panel textarea,
+    .contact-form-panel select {
+      width: 100%; padding: 12px 14px;
+      background: rgba(2,6,23,0.6);
+      border: 1px solid #334155; border-radius: 8px;
+      color: #f8fafc; font-size: 14px; font-family: 'Inter', sans-serif;
+      outline: none; box-sizing: border-box;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .contact-form-panel input:focus,
+    .contact-form-panel textarea:focus,
+    .contact-form-panel select:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
+    }
+    .contact-form-panel select option { background: #0f172a; }
+    .contact-form-panel textarea { resize: vertical; }
+    .contact-form-panel .submit-btn {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #9333ea, #6366f1);
+      border: none; border-radius: 10px;
+      color: white; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.3s;
+      margin-top: 4px;
+    }
+    .contact-form-panel .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(147,51,234,0.4);
+    }
+    .success-banner {
+      background: rgba(16,185,129,0.15);
+      border: 1px solid #10b981;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      color: #10b981;
+      font-weight: 600;
+      display: none;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <h1>Eventify</h1>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="clubs.html">Clubs</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+        <li><a href="portal-unified.html">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <div class="contact-hero">
+    <h1>Get In Touch</h1>
+    <p>Have a question? Want to join a club? Contact our secretaries directly or drop us a message below.</p>
+  </div>
+
+  <!-- SECRETARIES SECTION -->
+  <div class="secretaries-section">
+    <h2 class="section-heading">Club Secretaries</h2>
+    <p class="section-subheading">Reach out to any club secretary for queries and memberships.</p>
+    <div class="secretaries-grid" id="secretaries-grid"></div>
+  </div>
+
+  <!-- CONTACT FORM + INFO -->
+  <div class="contact-main">
+    <!-- Left: Info Panel -->
+    <div class="contact-info-panel">
+      <h2>AIT Pune Student Council</h2>
+      <p>We are here to help you find the right club and make your college experience memorable. Reach out to us anytime!</p>
+
+      <div class="info-item">
+        <div class="info-icon">📍</div>
+        <div class="info-item-text">
+          <strong>Location</strong>
+          <span>Army Institute of Technology, Dighi Hills, Pune – 411015</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">📞</div>
+        <div class="info-item-text">
+          <strong>Student Council Desk</strong>
+          <span>+91 20 2776 3100</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">✉️</div>
+        <div class="info-item-text">
+          <strong>General Enquiries</strong>
+          <span>studentcouncil@aitpune.edu.in</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">🕘</div>
+        <div class="info-item-text">
+          <strong>Office Hours</strong>
+          <span>Monday – Saturday, 9:00 AM – 5:00 PM</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 AIT Pune | Eventify</p>
+  </footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function getInitials(name) {
+      const cleanName = (name || '').trim();
+      if (!cleanName) return 'NA';
+      const parts = cleanName.split(/\s+/);
+      const first = parts[0] ? parts[0].charAt(0) : '';
+      const second = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+      return (first + second).toUpperCase() || 'NA';
+    }
+
+    function renderSecretaries() {
+      const grid = $('secretaries-grid');
+      grid.innerHTML = '<div class="empty-secretaries">Secretary details are currently unavailable.</div>';
+    }
+
+    document.addEventListener('DOMContentLoaded', renderSecretaries);
+    window.addEventListener('storage', (e) => {
+      if (e.key && (e.key === 'secretaries' || e.key.startsWith('clubInfo_'))) renderSecretaries();
+    });
+  </script>
+</body>
+</html>
