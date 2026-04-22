@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -74,6 +74,7 @@
   </div>
 </div>
 
+<script src="shared-db-sync.js"></script>
 <script>
   // Ensure some default event data exists for presentation if empty
   const storageKey = 'events_OSS_Club';
@@ -103,7 +104,7 @@
 
     // Render Total
     events.forEach(e => {
-      totalList.innerHTML += `<li><strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}</li>`;
+      totalList.innerHTML += `<li><strong>${e.name}:</strong> ðŸ“… ${e.date} - ${e.desc}</li>`;
     });
     
     if (events.length === 0) totalList.innerHTML = '<li style="border-left-color:gray; color:#cbd5f5;">No events found.</li>';
@@ -114,7 +115,7 @@
       ongoingList.innerHTML += `
         <li style="border-left-color:#3b82f6; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
           <div style="flex:1; min-width:200px; padding-right:15px;">
-            <strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}
+            <strong>${e.name}:</strong> ðŸ“… ${e.date} - ${e.desc}
           </div>
           <button class="register-btn" onclick="openRegModal(${e.id}, '${e.name.replace(/'/g, "\\'")}')">Register Now</button>
         </li>`;
@@ -128,7 +129,7 @@
       upcomingList.innerHTML += `
         <li style="border-left-color:#f59e0b; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
           <div style="flex:1; min-width:200px; padding-right:15px;">
-            <strong>${e.name}:</strong> 📅 ${e.date} - ${e.desc}
+            <strong>${e.name}:</strong> ðŸ“… ${e.date} - ${e.desc}
           </div>
           <button class="register-btn" onclick="openRegModal(${e.id}, '${e.name.replace(/'/g, "\\'")}')">Register Now</button>
         </li>`;
@@ -217,3 +218,4 @@
 
 </body>
 </html>
+

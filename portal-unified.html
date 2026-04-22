@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -136,7 +136,7 @@
           </div>
           <div class="input-grp">
             <label>Password</label>
-            <input type="password" id="log-pass" placeholder="••••••••" required />
+            <input type="password" id="log-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
           </div>
           <button type="submit" class="submit-btn" id="login-btn">Launch Dashboard</button>
         </form>
@@ -223,13 +223,13 @@
         <li class="menu-item" id="menu-teams" onclick="switchTab('teams')">Team Entries <span class="badge" id="c-team">0</span></li>
         <li class="menu-item" id="menu-join" onclick="switchTab('join')">Join Applications <span class="badge" id="c-join">0</span></li>
         <li class="menu-item" onclick="openClubMeetModal()" style="background: rgba(245, 158, 11, 0.18); color: var(--secondary);">Club Meet Form</li>
-        <li class="menu-item" id="menu-sett" onclick="switchTab('sett')" style="margin-top:20px; border-top: 1px solid #334155; padding-top:20px;">⚙️ Settings</li>
+        <li class="menu-item" id="menu-sett" onclick="switchTab('sett')" style="margin-top:20px; border-top: 1px solid #334155; padding-top:20px;">âš™ï¸ Settings</li>
       </ul>
       <button class="submit-btn" style="margin-top:30px; background: var(--success);" onclick="document.getElementById('ev-modal').style.display='flex'">+ New Event</button>
     </aside>
 
     <section class="content-card">
-      <div id="sync-alert" class="success-alert">✅ DATABASE SYNCED GLOBALLY</div>
+      <div id="sync-alert" class="success-alert">âœ… DATABASE SYNCED GLOBALLY</div>
       <div style="margin-bottom:35px;">
         <h2 id="view-title" style="margin:0;">All Events</h2>
       </div>
@@ -320,7 +320,8 @@
     </div>
   </div>
 
-  <script>
+  <script src="shared-db-sync.js"></script>
+<script>
     const HOME_NOTIFICATION_KEY = 'home_ongoing_notifications';
     const CLUB_MEET_NOTIFICATION_KEY = 'club_meet_notifications';
     const INTERVIEW_NOTIFICATION_KEY = 'interview_notifications';
@@ -346,37 +347,28 @@
 
     function sanitizeLegacySecretaryDetails() {
       if (!localStorage.getItem(SECRETARY_PURGE_KEY)) {
-        localStorage.removeItem('secretaries');
-        localStorage.removeItem('loggedSecretary');
-        localStorage.removeItem('lastActiveClub');
         localStorage.setItem(SECRETARY_PURGE_KEY, '1');
-        currentUser = null;
       }
-
-      Object.keys(localStorage).forEach((key) => {
-        if (!key.startsWith('clubInfo_')) return;
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        if (!data || typeof data !== 'object') return;
-
-        if (Object.prototype.hasOwnProperty.call(data, 'email') || Object.prototype.hasOwnProperty.call(data, 'phone')) {
-          delete data.email;
-          delete data.phone;
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      });
 
       const db = (JSON.parse(localStorage.getItem('secretaries')) || []).map((s) => ({
         name: s.name,
         regNo: s.regNo,
         password: s.password,
-        club: s.club
+        club: s.club,
+        email: s.email || '',
+        phone: s.phone || ''
       }));
       localStorage.setItem('secretaries', JSON.stringify(db));
 
       if (currentUser) {
-        currentUser = { name: currentUser.name, regNo: currentUser.regNo, password: currentUser.password, club: currentUser.club };
+        currentUser = {
+          name: currentUser.name,
+          regNo: currentUser.regNo,
+          password: currentUser.password,
+          club: currentUser.club,
+          email: currentUser.email || '',
+          phone: currentUser.phone || ''
+        };
         localStorage.setItem('loggedSecretary', JSON.stringify(currentUser));
       }
     }
@@ -610,7 +602,14 @@
       const regNo = $('log-regNo').value.trim();
       const pass = $('log-pass').value;
       let db = JSON.parse(localStorage.getItem('secretaries')) || [];
-      db = db.map((s) => ({ name: s.name, regNo: s.regNo, password: s.password, club: s.club }));
+      db = db.map((s) => ({
+        name: s.name,
+        regNo: s.regNo,
+        password: s.password,
+        club: s.club,
+        email: s.email || '',
+        phone: s.phone || ''
+      }));
       localStorage.setItem('secretaries', JSON.stringify(db));
       
       const user = db.find(u => u.name.toLowerCase() === name.toLowerCase() && u.regNo === regNo && u.password === pass);
@@ -621,7 +620,7 @@
       } else {
         const err = $('login-error');
         err.style.display = 'block';
-        err.textContent = '⚠️ Invalid credentials. Check name, registration number, or password.';
+        err.textContent = 'âš ï¸ Invalid credentials. Check name, registration number, or password.';
       }
     });
 
@@ -643,7 +642,7 @@
       let db = JSON.parse(localStorage.getItem('secretaries')) || [];
       if (db.find(s => s.regNo === reg)) return alert('Registration number already exists.');
 
-      const newUser = { name, regNo: reg, password: pass, club };
+      const newUser = { name, regNo: reg, password: pass, club, email, phone };
       db.push(newUser);
       localStorage.setItem('secretaries', JSON.stringify(db));
 
@@ -652,7 +651,10 @@
       const existingClubInfo = JSON.parse(localStorage.getItem(cKey)) || {};
       localStorage.setItem(cKey, JSON.stringify({
         ...existingClubInfo,
-        club
+        club,
+        secretaryName: existingClubInfo.secretaryName || name,
+        secretaryEmail: email,
+        secretaryPhone: phone
       }));
 
       currentUser = newUser;
@@ -1104,3 +1106,5 @@
   </script>
 </body>
 </html>
+
+

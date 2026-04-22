@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -32,7 +32,7 @@
   </style>
 </head>
 <body class="login-body">
-  <div class="sync-proofer">🚩 VERSION 7: CLASSIC UN-MERGED PANEL ACTIVE 🚩</div>
+  <div class="sync-proofer">ðŸš© VERSION 7: CLASSIC UN-MERGED PANEL ACTIVE ðŸš©</div>
 
   <header>
     <nav class="navbar">
@@ -68,7 +68,7 @@
           </div>
           <div class="input-grp">
             <label>PASSWORD</label>
-            <input type="password" id="log-pass" placeholder="••••••••" required />
+            <input type="password" id="log-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
           </div>
           <button type="submit" class="submit-btn">Open Dashboard</button>
         </form>
@@ -154,7 +154,8 @@
     </div>
   </div>
 
-  <script>
+  <script src="shared-db-sync.js"></script>
+<script>
     const CUSTOM_CLUBS_KEY = 'customClubs';
     const DELETED_BASE_CLUBS_KEY = 'deletedBaseClubs';
     const SECRETARY_PURGE_KEY = 'secretariesDataPurge_v1';
@@ -169,37 +170,29 @@
 
     function sanitizeLegacySecretaryDetails() {
       if (!localStorage.getItem(SECRETARY_PURGE_KEY)) {
-        localStorage.removeItem('secretaries');
-        localStorage.removeItem('loggedSecretary');
-        localStorage.removeItem('lastActiveClub');
         localStorage.setItem(SECRETARY_PURGE_KEY, '1');
       }
-
-      Object.keys(localStorage).forEach((key) => {
-        if (!key.startsWith('clubInfo_')) return;
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        if (!data || typeof data !== 'object') return;
-
-        if (Object.prototype.hasOwnProperty.call(data, 'email') || Object.prototype.hasOwnProperty.call(data, 'phone')) {
-          delete data.email;
-          delete data.phone;
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      });
 
       const db = (JSON.parse(localStorage.getItem('secretaries')) || []).map((s) => ({
         name: s.name,
         regNo: s.regNo,
         password: s.password,
-        club: s.club
+        club: s.club,
+        email: s.email || '',
+        phone: s.phone || ''
       }));
       localStorage.setItem('secretaries', JSON.stringify(db));
 
       const logged = JSON.parse(localStorage.getItem('loggedSecretary'));
       if (logged) {
-        localStorage.setItem('loggedSecretary', JSON.stringify({ name: logged.name, regNo: logged.regNo, password: logged.password, club: logged.club }));
+        localStorage.setItem('loggedSecretary', JSON.stringify({
+          name: logged.name,
+          regNo: logged.regNo,
+          password: logged.password,
+          club: logged.club,
+          email: logged.email || '',
+          phone: logged.phone || ''
+        }));
       }
     }
 
@@ -434,7 +427,14 @@
       const r = document.getElementById('log-regNo').value.trim();
       const p = document.getElementById('log-pass').value;
       let db = JSON.parse(localStorage.getItem('secretaries')) || [];
-      db = db.map((s) => ({ name: s.name, regNo: s.regNo, password: s.password, club: s.club }));
+      db = db.map((s) => ({
+        name: s.name,
+        regNo: s.regNo,
+        password: s.password,
+        club: s.club,
+        email: s.email || '',
+        phone: s.phone || ''
+      }));
       localStorage.setItem('secretaries', JSON.stringify(db));
       const u = db.find(s => s.name.toLowerCase() === n.toLowerCase() && s.regNo === r && s.password === p);
       if (u) {
@@ -474,7 +474,7 @@
           return;
         }
 
-        db.push({ name:n, regNo:r, password:p, club:c });
+        db.push({ name:n, regNo:r, password:p, club:c, email, phone });
         localStorage.setItem('secretaries', JSON.stringify(db));
 
         const safeName = c.replace(/[^a-zA-Z0-9]/g, '_');
@@ -482,10 +482,13 @@
         const existingClubInfo = JSON.parse(localStorage.getItem(cKey)) || {};
         localStorage.setItem(cKey, JSON.stringify({
           ...existingClubInfo,
-          club: c
+          club: c,
+          secretaryName: existingClubInfo.secretaryName || n,
+          secretaryEmail: email,
+          secretaryPhone: phone
         }));
 
-        localStorage.setItem('loggedSecretary', JSON.stringify({ name:n, regNo:r, club:c }));
+        localStorage.setItem('loggedSecretary', JSON.stringify({ name:n, regNo:r, club:c, email, phone }));
         localStorage.setItem('lastActiveClub', c);
         alert('Registration successful. Redirecting...');
         window.location.href = 'dashboard-v5.html';
@@ -503,3 +506,5 @@
   </script>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -242,31 +242,31 @@
       <p>We are here to help you find the right club and make your college experience memorable. Reach out to us anytime!</p>
 
       <div class="info-item">
-        <div class="info-icon">📍</div>
+        <div class="info-icon">ðŸ“</div>
         <div class="info-item-text">
           <strong>Location</strong>
-          <span>Army Institute of Technology, Dighi Hills, Pune – 411015</span>
+          <span>Army Institute of Technology, Dighi Hills, Pune â€“ 411015</span>
         </div>
       </div>
       <div class="info-item">
-        <div class="info-icon">📞</div>
+        <div class="info-icon">ðŸ“ž</div>
         <div class="info-item-text">
           <strong>Student Council Desk</strong>
           <span>+91 20 2776 3100</span>
         </div>
       </div>
       <div class="info-item">
-        <div class="info-icon">✉️</div>
+        <div class="info-icon">âœ‰ï¸</div>
         <div class="info-item-text">
           <strong>General Enquiries</strong>
           <span>studentcouncil@aitpune.edu.in</span>
         </div>
       </div>
       <div class="info-item">
-        <div class="info-icon">🕘</div>
+        <div class="info-icon">ðŸ•˜</div>
         <div class="info-item-text">
           <strong>Office Hours</strong>
-          <span>Monday – Saturday, 9:00 AM – 5:00 PM</span>
+          <span>Monday â€“ Saturday, 9:00 AM â€“ 5:00 PM</span>
         </div>
       </div>
     </div>
@@ -274,10 +274,11 @@
   </div>
 
   <footer>
-    <p>© 2026 AIT Pune | Eventify</p>
+    <p>Â© 2026 AIT Pune | Eventify</p>
   </footer>
 
-  <script>
+  <script src="shared-db-sync.js"></script>
+<script>
     const $ = (id) => document.getElementById(id);
 
     function getInitials(name) {
@@ -289,15 +290,87 @@
       return (first + second).toUpperCase() || 'NA';
     }
 
-    function renderSecretaries() {
-      const grid = $('secretaries-grid');
-      grid.innerHTML = '<div class="empty-secretaries">Secretary details are currently unavailable.</div>';
+    function getClubInfoByClubName(clubName) {
+      const safeName = String(clubName || '').replace(/[^a-zA-Z0-9]/g, '_');
+      return JSON.parse(localStorage.getItem(`clubInfo_${safeName}`) || 'null') || {};
     }
 
-    document.addEventListener('DOMContentLoaded', renderSecretaries);
+    function getSecretariesForContact() {
+      const byReg = new Map();
+      const secretaries = JSON.parse(localStorage.getItem('secretaries') || '[]');
+
+      secretaries.forEach((s) => {
+        if (!s || !s.name || !s.club) return;
+        const info = getClubInfoByClubName(s.club);
+        const regKey = String(s.regNo || `${s.club}-${s.name}`).trim().toLowerCase();
+        byReg.set(regKey, {
+          name: s.name,
+          club: s.club,
+          email: s.email || info.secretaryEmail || '',
+          phone: s.phone || info.secretaryPhone || ''
+        });
+      });
+
+      Object.keys(localStorage).forEach((key) => {
+        if (!key.startsWith('clubInfo_')) return;
+        const info = JSON.parse(localStorage.getItem(key) || 'null');
+        if (!info || !info.club || !info.secretaryName) return;
+
+        const mapKey = String(`${info.club}-${info.secretaryName}`).trim().toLowerCase();
+        if (!byReg.has(mapKey)) {
+          byReg.set(mapKey, {
+            name: info.secretaryName,
+            club: info.club,
+            email: info.secretaryEmail || '',
+            phone: info.secretaryPhone || ''
+          });
+        }
+      });
+
+      return Array.from(byReg.values()).sort((a, b) => String(a.club).localeCompare(String(b.club)));
+    }
+
+    function renderSecretaries() {
+      const grid = $('secretaries-grid');
+      const list = getSecretariesForContact();
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty-secretaries">Secretary details are currently unavailable.</div>';
+        return;
+      }
+
+      grid.innerHTML = list.map((s) => {
+        const emailLine = s.email
+          ? `<a href="mailto:${s.email}">${s.email}</a>`
+          : '<span>Email not shared yet</span>';
+        const phoneLine = s.phone
+          ? `<a href="tel:${s.phone}">${s.phone}</a>`
+          : '<span>Phone not shared yet</span>';
+
+        return `
+          <div class="secretary-card">
+            <div class="secretary-avatar">${getInitials(s.name)}</div>
+            <h3>${s.name}</h3>
+            <div class="club-tag">${s.club}</div>
+            <div class="contact-info">
+              ${emailLine}
+              ${phoneLine}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.eventifyStorageReady && typeof window.eventifyStorageReady.then === 'function') {
+        await window.eventifyStorageReady;
+      }
+      renderSecretaries();
+    });
     window.addEventListener('storage', (e) => {
       if (e.key && (e.key === 'secretaries' || e.key.startsWith('clubInfo_'))) renderSecretaries();
     });
   </script>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -56,7 +56,7 @@
   </style>
 </head>
 <body>
-  <div class="sync-proofer">🚩 DASHBOARD PRO V8: ALL FEATURES RESTORED 🚩</div>
+  <div class="sync-proofer">ðŸš© DASHBOARD PRO V8: ALL FEATURES RESTORED ðŸš©</div>
 
   <header class="navbar">
     <h1>Eventify</h1>
@@ -68,7 +68,8 @@
     </ul>
   </header>
 
-  <script>
+  <script src="shared-db-sync.js"></script>
+<script>
     const user = JSON.parse(localStorage.getItem('loggedSecretary'));
     if (!user) window.location.href = 'portal-unified.html';
     const cName = user.club;
@@ -79,7 +80,7 @@
 
   <!-- Rest of HTML remains the same... -->
 
-  <script>
+<script>
     const HOME_NOTIFICATION_KEY = 'home_ongoing_notifications';
     const NOTIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -141,7 +142,7 @@
       
       list.forEach(e => {
         const d = document.createElement('div'); d.className='event-card';
-        d.innerHTML = `<span class='event-tag'>${e.status}</span><div class='event-id'><h3>${e.name}</h3><p>📅 ${e.date}<br>${e.desc}</p><div class='card-footer'><a href='#' class='foot-btn btn-view'>View Students</a><button onclick='del(${e.id})' class='foot-btn btn-del'>Delete</button></div></div>`;
+        d.innerHTML = `<span class='event-tag'>${e.status}</span><div class='event-id'><h3>${e.name}</h3><p>ðŸ“… ${e.date}<br>${e.desc}</p><div class='card-footer'><a href='#' class='foot-btn btn-view'>View Students</a><button onclick='del(${e.id})' class='foot-btn btn-del'>Delete</button></div></div>`;
         f.appendChild(d);
       });
     }
@@ -177,3 +178,5 @@
   </script>
 </body>
 </html>
+
+
